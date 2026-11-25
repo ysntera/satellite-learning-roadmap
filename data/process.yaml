@@ -1,0 +1,26 @@
+# 最終目標：衛星開発のプロセス（ページ下部の流れ図）
+# - name        : 工程の名前
+# - description : その工程で何をするか
+# - fields      : 主に関わる分野の id（tracks.yaml）。system はすべての工程に関わるので書かない
+
+- name: ミッション・要求定義
+  description: 衛星で何をするか、どこまでできたら成功かを決め、要求に分ける。
+  fields: [space]
+- name: システム設計
+  description: 軌道・質量・電力・データなどの配分を決め、衛星全体の構成を決める。
+  fields: [space, eps, comm]
+- name: サブシステム設計
+  description: 各分野が、要求を満たす機器・回路・ソフト・構造を設計する。
+  fields: [eps, thermal, structure, cdh, comm, adcs]
+- name: 製造・組立
+  description: 部品を作って検査し、基板・構造・ハーネスを組み立てる。
+  fields: [ait, structure, eps, cdh]
+- name: 統合
+  description: 各分野の機器を1機の衛星にまとめ、つないで動作を確かめる。
+  fields: [ait, cdh, comm]
+- name: 試験・検証
+  description: 振動・熱真空・E2E などの試験で、要求を満たすことを確かめる。
+  fields: [ait, structure, thermal, comm, adcs]
+- name: 運用
+  description: 打上げ後、地上局から衛星を動かし、データを取ってミッションを果たす。
+  fields: [comm, cdh, adcs, space]

@@ -1,0 +1,547 @@
+<title>人工衛星開発への道 選書ボード</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<!-- 選書ボード（claude.ai のアーティファクト専用ページ）
+     ロードマップの本を分野ごとに ◎ ○ × ? で選び、足りない本を追加する画面。
+     本・分野・スキルは data/*.yaml をそのまま読む（ロードマップと同じデータ）。
+     答えはアーティファクトのデータベース（db）に保存し、Claude が読んで data/books.yaml に反映する。
+       ratings/<本の id>    … { rating: "must"|"nice"|"no"|"unknown", comment, updated_at }
+       skill_books/<スキルの id> … { text, updated_at }（本がまだないスキルに使えそうな本）
+       additions/<自動の id> … { field, title, author, url, level, skills, reason, created_at }
+     GitHub Pages には載せない（deploy-pages.yml はこのファイルをコピーしない） -->
+<style>
+  /* 本の目録のように罫線で区切る。色は分野の印・選んだ必要度・操作できる場所だけに使う */
+  :root {
+    --bg: #F7F7F5; --surface: #FFFFFF; --sunken: #F0F0EC;
+    --text: #1D2228; --text-sub: #4D535B; --text-faint: #7C828A;
+    --border: #DCDCD6; --border-strong: #B9B9B0;
+    --navy: #18345A; --on-navy: #FFFFFF; --accent: #1F4E8C;
+    --must: #1F6B43; --must-bg: #E3F1E8; --nice: #2E5E8C; --nice-bg: #E4EDF6;
+    --no: #9A3A2E; --no-bg: #F6E5E2; --unknown: #6B6B62; --unknown-bg: #ECECE6;
+    --radius: 4px;
+    --font-body: "Noto Sans JP", "Hiragino Sans", "Yu Gothic UI", "Meiryo", system-ui, sans-serif;
+    --font-num: "IBM Plex Mono", ui-monospace, "Consolas", monospace;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --bg: #15181C; --surface: #1D2126; --sunken: #23282E;
+    --text: #E6E8EB; --text-sub: #B3B8BF; --text-faint: #858B93;
+    --border: #30363D; --border-strong: #4A5159;
+    --navy: #10243F; --on-navy: #F2F4F7; --accent: #8DB5E8;
+    --must: #7FD0A1; --must-bg: #1C3327; --nice: #93BCE6; --nice-bg: #1C2B3B;
+    --no: #EE9A8E; --no-bg: #3A2320; --unknown: #B9B9B0; --unknown-bg: #2B2D2F;
+    color-scheme: dark;
+  } }
+  :root[data-theme="dark"] {
+    --bg: #15181C; --surface: #1D2126; --sunken: #23282E;
+    --text: #E6E8EB; --text-sub: #B3B8BF; --text-faint: #858B93;
+    --border: #30363D; --border-strong: #4A5159;
+    --navy: #10243F; --on-navy: #F2F4F7; --accent: #8DB5E8;
+    --must: #7FD0A1; --must-bg: #1C3327; --nice: #93BCE6; --nice-bg: #1C2B3B;
+    --no: #EE9A8E; --no-bg: #3A2320; --unknown: #B9B9B0; --unknown-bg: #2B2D2F;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); line-height: 1.6; }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--navy); }
+  button, input, textarea, select { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+  /* ヘッダー：題名と集計 */
+  .site-header { background: var(--navy); color: var(--on-navy); padding-block: 22px 18px; }
+  .site-header h1 { margin: 0; font-size: 1.45rem; letter-spacing: 0.02em; text-wrap: balance; }
+  .site-header p { margin: 6px 0 0; font-size: 0.86rem; opacity: 0.88; max-width: 62ch; }
+  .tally { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 14px; font-size: 0.85rem; }
+  .tally span { display: inline-flex; gap: 6px; align-items: baseline; }
+  .tally b { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 1.05rem; }
+
+  .status { margin: 14px 0 0; padding: 8px 12px; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--surface); font-size: 0.85rem; color: var(--text-sub); }
+  .status.warn { border-color: var(--no); color: var(--no); }
+
+  /* 分野の切り替え */
+  .field-nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--border); padding-block: 10px; }
+  .field-nav .wrap { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: thin; }
+  .field-tab { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); cursor: pointer; font-size: 0.85rem; white-space: nowrap; }
+  .field-tab[aria-pressed="true"] { border-color: var(--text); font-weight: 700; }
+  .field-tab .count { font-family: var(--font-num); font-size: 0.75rem; color: var(--text-faint); }
+  .swatch { width: 9px; height: 9px; background: var(--c); flex: none; }
+
+  main { padding-block: 10px 60px; }
+  .field-section { margin-top: 26px; }
+  .field-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; border-bottom: 2px solid var(--text); padding-bottom: 6px; }
+  .field-head h2 { margin: 0; font-size: 1.15rem; display: inline-flex; gap: 8px; align-items: center; }
+  .field-head .swatch { width: 11px; height: 11px; }
+  .field-head p { margin: 0; font-size: 0.8rem; color: var(--text-faint); }
+  h3 { font-size: 0.85rem; color: var(--text-sub); margin: 18px 0 6px; font-weight: 700; }
+
+  /* 本の行 */
+  .book-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 16px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .book-title { font-weight: 700; font-size: 0.95rem; }
+  .book-meta { font-size: 0.78rem; color: var(--text-sub); }
+  .book-meta .lv { display: inline-block; margin-right: 6px; padding: 0 5px; border: 1px solid var(--border-strong); border-radius: 2px; font-size: 0.72rem; }
+  .book-meta a { color: var(--accent); }
+  .book-note { font-size: 0.78rem; color: var(--text-faint); margin-top: 2px; }
+  .rating { display: inline-flex; border: 1px solid var(--border-strong); border-radius: var(--radius); overflow: hidden; align-self: start; }
+  .rating button { border: none; border-left: 1px solid var(--border); background: var(--surface); padding: 6px 10px; cursor: pointer; font-size: 0.82rem; white-space: nowrap; min-width: 3.6em; }
+  .rating button:first-child { border-left: none; }
+  .rating button:hover { background: var(--sunken); }
+  .rating button[aria-pressed="true"][data-v="must"] { background: var(--must-bg); color: var(--must); font-weight: 700; }
+  .rating button[aria-pressed="true"][data-v="nice"] { background: var(--nice-bg); color: var(--nice); font-weight: 700; }
+  .rating button[aria-pressed="true"][data-v="no"] { background: var(--no-bg); color: var(--no); font-weight: 700; }
+  .rating button[aria-pressed="true"][data-v="unknown"] { background: var(--unknown-bg); color: var(--unknown); font-weight: 700; }
+  .rating .mark { font-family: var(--font-num); margin-right: 3px; }
+  .book-row.rated-no .book-title { color: var(--text-faint); text-decoration: line-through; text-decoration-color: var(--border-strong); }
+  .comment { grid-column: 1 / -1; }
+  textarea, input[type="text"], input[type="url"], select {
+    width: 100%; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); padding: 6px 8px; font-size: 0.85rem;
+  }
+  textarea { resize: vertical; min-height: 2.4em; }
+  textarea::placeholder, input::placeholder { color: var(--text-faint); }
+
+  /* 本がないスキル */
+  .skill-row { display: grid; grid-template-columns: minmax(8em, 14em) minmax(0, 1fr); gap: 6px 12px; align-items: center; padding: 6px 0; border-bottom: 1px dotted var(--border); font-size: 0.85rem; }
+
+  /* 追加した本 */
+  .added-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 10px 12px; margin-top: 8px; background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--c); border-radius: var(--radius); }
+  .added-row .book-title::before { content: "追加"; font-size: 0.7rem; font-weight: 400; color: var(--text-sub); border: 1px solid var(--border-strong); border-radius: 2px; padding: 0 4px; margin-right: 6px; vertical-align: 1px; }
+  .text-btn { border: none; background: none; padding: 2px 4px; color: var(--accent); cursor: pointer; font-size: 0.8rem; text-decoration: underline; text-decoration-color: var(--border-strong); text-underline-offset: 2px; }
+  .text-btn.danger { color: var(--no); }
+  .confirm-line { grid-column: 1 / -1; font-size: 0.8rem; color: var(--no); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+  /* 本を追加するフォーム */
+  .add-toggle { margin-top: 10px; border: 1px dashed var(--border-strong); border-radius: var(--radius); background: transparent; padding: 7px 12px; cursor: pointer; font-size: 0.85rem; color: var(--accent); }
+  .add-form { margin-top: 10px; padding: 14px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; }
+  .add-form label { display: grid; gap: 3px; font-size: 0.78rem; color: var(--text-sub); }
+  .add-form .wide { grid-column: 1 / -1; }
+  .add-form .req::after { content: " *"; color: var(--no); }
+  .form-actions { grid-column: 1 / -1; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .primary-btn { border: none; border-radius: var(--radius); background: var(--navy); color: var(--on-navy); padding: 7px 16px; cursor: pointer; font-weight: 700; font-size: 0.85rem; }
+  .form-msg { font-size: 0.8rem; color: var(--no); }
+
+  .saved-note { font-size: 0.72rem; color: var(--text-faint); min-height: 1em; }
+  .empty { color: var(--text-faint); font-size: 0.85rem; padding: 8px 0; }
+  .error-box { margin-top: 14px; padding: 10px 12px; border: 1px solid var(--no); color: var(--no); background: var(--no-bg); border-radius: var(--radius); font-size: 0.85rem; }
+
+  @media (max-width: 640px) {
+    .book-row { grid-template-columns: minmax(0, 1fr); }
+    .rating { width: 100%; }
+    .rating button { flex: 1; min-width: 0; padding: 7px 4px; }
+    .skill-row { grid-template-columns: minmax(0, 1fr); }
+    .add-form { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+
+<header class="site-header">
+  <div class="wrap">
+    <h1>選書ボード</h1>
+    <p>人工衛星開発への道に載せる本を、分野ごとに決めます。本ごとに ◎ 必須 ／ ○ あるとよい ／ × いらない ／ ? 分からない を選び、足りない本は「＋ 本を追加する」から書き足します。選んだ内容はすぐ保存され、Claude が読んでロードマップに反映します。</p>
+    <div class="tally" id="tally" aria-live="polite"></div>
+  </div>
+</header>
+
+<nav class="field-nav" aria-label="分野">
+  <div class="wrap" id="field-nav"></div>
+</nav>
+
+<main class="wrap">
+  <div id="status" class="status">読み込み中です…</div>
+  <div id="error-box" class="error-box" role="alert" hidden></div>
+  <div id="sections"></div>
+</main>
+
+<script>
+// =============================================================
+// 選書ボード
+//   1. data/*.yaml から分野・スキル・本を読む
+//   2. データベース（db）の答えを読み、画面に反映する（ほかのタブで変えても自動で更新）
+//   3. ボタン・入力欄を操作したら、その本（スキル）の答えだけを保存する
+// =============================================================
+
+// ---------- 定数 ----------
+const DATA_PATHS = { tracks: "data/tracks.yaml", skills: "data/nodes.yaml", books: "data/books.yaml" };
+const RATINGS = [
+  { v: "must", mark: "◎", name: "必須" },
+  { v: "nice", mark: "○", name: "あるとよい" },
+  { v: "no", mark: "×", name: "いらない" },
+  { v: "unknown", mark: "?", name: "分からない" },
+];
+const LEVEL_NAMES = { intro: "入門", basic: "基礎", advanced: "専門" };
+const LEVEL_ORDER = ["intro", "basic", "advanced"];
+const TEXT_SAVE_DELAY_MS = 800;     // 文字の入力が止まってから保存するまでの時間
+const LOAD_TIMEOUT_MS = 10000;      // データベースが答えないときに知らせるまでの時間
+const COMMON_FIELD_ID = "common";
+
+// ---------- 状態 ----------
+const state = {
+  tracks: [], skills: [], books: [],
+  ratings: new Map(),      // 本 id → { rating, comment }
+  skill_books: new Map(),  // スキル id → { text }
+  additions: [],           // { id, field, title, ... }
+  field: COMMON_FIELD_ID,  // 表示中の分野
+  open_form: false,        // 追加フォームを開いているか
+  confirm_delete: null,    // 削除を確かめている追加本の id
+};
+let db = null;
+let can_write = false;
+const write_chains = new Map();   // 文書のパス → 直前の書き込み（同じ文書へは1つずつ書く）
+const text_timers = new Map();
+
+// ---------- 小さな道具 ----------
+function escape_html(text) {
+  return String(text ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+function is_https(url) { return /^https:\/\//.test(String(url || "")); }
+function field_name(t) { return t.common ? "共通（全体像）" : t.name; }
+function show_error(message) {
+  const box = document.getElementById("error-box");
+  box.textContent = message;
+  box.hidden = false;
+}
+function set_status(message, warn = false) {
+  const el = document.getElementById("status");
+  el.textContent = message;
+  el.classList.toggle("warn", warn);
+  el.hidden = !message;
+}
+
+// ---------- データの読み込み ----------
+async function load_yaml(path) {
+  const response = await fetch(path);
+  if (!response.ok) throw new Error(`${path} を読み込めませんでした（HTTP ${response.status}）。`);
+  return jsyaml.load(await response.text()) || [];
+}
+async function load_catalog() {
+  if (typeof jsyaml === "undefined") throw new Error("YAML を読むライブラリ（js-yaml）を読み込めませんでした。");
+  const [tracks, skills, books] = await Promise.all([
+    load_yaml(DATA_PATHS.tracks), load_yaml(DATA_PATHS.skills), load_yaml(DATA_PATHS.books),
+  ]);
+  state.tracks = tracks;
+  state.skills = skills.map((s) => ({ ...s, books: s.books || [] }));
+  state.books = books;
+}
+
+// ---------- 保存 ----------
+// 同じ文書への書き込みは、前の書き込みが終わってから行う
+function queue_write(path, body) {
+  const previous = write_chains.get(path) || Promise.resolve();
+  const next = previous.catch(() => {}).then(() => db.doc(path).set(body));
+  write_chains.set(path, next);
+  next.then(() => flash_saved(path)).catch((error) => {
+    console.error(error);
+    if (error && error.code === "invalid_argument") {
+      can_write = false;
+      set_status("このページでは保存できません（編集の権限がありません）。表示だけになります。", true);
+      render();
+    } else {
+      show_error(`保存できませんでした（${error && error.code ? error.code : "原因不明"}）。少し待ってから、もう一度選び直してください。`);
+    }
+  });
+  return next;
+}
+function flash_saved(path) {
+  const el = document.querySelector(`[data-saved-for="${CSS.escape(path)}"]`);
+  if (!el) return;
+  el.textContent = "保存しました";
+  setTimeout(() => { if (el.textContent === "保存しました") el.textContent = ""; }, 1600);
+}
+function now_iso() { return new Date().toISOString(); }
+
+function save_rating(book_id) {
+  const r = state.ratings.get(book_id) || {};
+  queue_write(`ratings/${book_id}`, { rating: r.rating || null, comment: r.comment || "", updated_at: now_iso() });
+}
+function save_skill_books(skill_id) {
+  const s = state.skill_books.get(skill_id) || {};
+  queue_write(`skill_books/${skill_id}`, { text: s.text || "", updated_at: now_iso() });
+}
+// 文字の入力は、手が止まってから1回だけ保存する
+function schedule_text_save(key, save) {
+  clearTimeout(text_timers.get(key));
+  text_timers.set(key, setTimeout(() => { text_timers.delete(key); save(); }, TEXT_SAVE_DELAY_MS));
+}
+function flush_text_save(key, save) {
+  if (!text_timers.has(key)) return;
+  clearTimeout(text_timers.get(key));
+  text_timers.delete(key);
+  save();
+}
+
+// ---------- 画面 ----------
+function counts_for(field_id) {
+  const books = state.books.filter((b) => !field_id || b.field === field_id);
+  const c = { must: 0, nice: 0, no: 0, unknown: 0, none: 0, total: books.length };
+  books.forEach((b) => { const r = state.ratings.get(b.id)?.rating; c[r || "none"] += 1; });
+  c.added = state.additions.filter((a) => !field_id || a.field === field_id).length;
+  return c;
+}
+
+function render_tally() {
+  const c = counts_for(null);
+  document.getElementById("tally").innerHTML = `
+    <span>採用（◎・○）<b>${c.must + c.nice}</b></span>
+    <span>× いらない <b>${c.no}</b></span>
+    <span>? 分からない <b>${c.unknown}</b></span>
+    <span>未回答 <b>${c.none}</b> ／ ${c.total} 冊</span>
+    <span>追加した本 <b>${c.added}</b></span>`;
+}
+
+function render_nav() {
+  const nav = document.getElementById("field-nav");
+  nav.innerHTML = state.tracks.map((t) => {
+    const c = counts_for(t.id);
+    return `<button type="button" class="field-tab" data-field="${escape_html(t.id)}" style="--c:${escape_html(t.color)}"
+      aria-pressed="${t.id === state.field}"><span class="swatch" aria-hidden="true"></span>${escape_html(field_name(t))}
+      <span class="count">${c.total - c.none}/${c.total}${c.added ? " ＋" + c.added : ""}</span></button>`;
+  }).join("");
+  nav.querySelectorAll(".field-tab").forEach((btn) => btn.addEventListener("click", () => {
+    state.field = btn.dataset.field;
+    state.open_form = false;
+    state.confirm_delete = null;
+    render();
+    window.scrollTo({ top: 0 });
+  }));
+}
+
+function book_row_html(b) {
+  const r = state.ratings.get(b.id) || {};
+  const path = `ratings/${b.id}`;
+  const meta = [b.author, b.publisher, b.year].filter(Boolean).map(escape_html).join("／");
+  const tags = [b.lang === "en" ? "英語" : "", b.free ? "無料" : ""].filter(Boolean).join("・");
+  const buttons = RATINGS.map((x) => `<button type="button" data-v="${x.v}" aria-pressed="${r.rating === x.v}"
+      ${can_write ? "" : "disabled"} title="${x.name}"><span class="mark">${x.mark}</span>${x.name}</button>`).join("");
+  return `
+    <div class="book-row ${r.rating === "no" ? "rated-no" : ""}" data-book="${escape_html(b.id)}">
+      <div>
+        <div class="book-title">${escape_html(b.title)}</div>
+        <div class="book-meta"><span class="lv">${escape_html(LEVEL_NAMES[b.level] || "?")}</span>${meta}${tags ? "（" + tags + "）" : ""}
+          ${is_https(b.url) ? ` <a href="${escape_html(b.url)}" target="_blank" rel="noopener">ページを開く</a>` : ""}</div>
+        ${b.note ? `<div class="book-note">${escape_html(b.note)}</div>` : ""}
+      </div>
+      <div class="rating" role="group" aria-label="${escape_html(b.title)} の必要度">${buttons}</div>
+      <div class="comment">
+        <textarea id="comment-${escape_html(b.id)}" rows="1" placeholder="コメント（読む章・順番・代わりの本など。任意）" ${can_write ? "" : "disabled"}>${escape_html(r.comment || "")}</textarea>
+        <div class="saved-note" data-saved-for="${escape_html(path)}"></div>
+      </div>
+    </div>`;
+}
+
+function skill_row_html(s) {
+  const v = state.skill_books.get(s.id)?.text || "";
+  return `
+    <div class="skill-row">
+      <span>${escape_html(s.title)}</span>
+      <div>
+        <input type="text" id="skill-${escape_html(s.id)}" data-skill="${escape_html(s.id)}" value="${escape_html(v)}"
+          placeholder="学べる本があれば書名を" ${can_write ? "" : "disabled"}>
+        <div class="saved-note" data-saved-for="skill_books/${escape_html(s.id)}"></div>
+      </div>
+    </div>`;
+}
+
+function added_row_html(a, track) {
+  const meta = [a.author, LEVEL_NAMES[a.level]].filter(Boolean).map(escape_html).join("／");
+  const confirming = state.confirm_delete === a.id;
+  return `
+    <div class="added-row" style="--c:${escape_html(track.color)}">
+      <div>
+        <div class="book-title">${escape_html(a.title)}</div>
+        <div class="book-meta">${meta}${is_https(a.url) ? ` <a href="${escape_html(a.url)}" target="_blank" rel="noopener">ページを開く</a>` : ""}</div>
+        ${a.skills ? `<div class="book-note">身につくスキル：${escape_html(a.skills)}</div>` : ""}
+        ${a.reason ? `<div class="book-note">理由：${escape_html(a.reason)}</div>` : ""}
+      </div>
+      ${can_write && !confirming ? `<button type="button" class="text-btn danger" data-delete="${escape_html(a.id)}">取り消す</button>` : "<span></span>"}
+      ${confirming ? `<div class="confirm-line">この追加を取り消しますか？（元に戻せません）
+        <button type="button" class="text-btn danger" data-delete-yes="${escape_html(a.id)}">取り消す</button>
+        <button type="button" class="text-btn" data-delete-no>やめる</button></div>` : ""}
+    </div>`;
+}
+
+function add_form_html(track) {
+  if (!can_write) return "";
+  if (!state.open_form) {
+    return `<button type="button" class="add-toggle" id="add-toggle">＋ ${escape_html(field_name(track))}の本を追加する</button>`;
+  }
+  const field_skills = state.skills.filter((s) => s.field === track.id);
+  return `
+    <form class="add-form" id="add-form" novalidate>
+      <label class="wide"><span class="req">書名</span><input type="text" id="add-title" required placeholder="例：人工衛星をつくる"></label>
+      <label>著者・出版社・発行年<input type="text" id="add-author" placeholder="例：宮崎康行／オーム社／2011"></label>
+      <label><span class="req">レベル</span><select id="add-level">
+        <option value="">選んでください</option>
+        <option value="intro">入門（全体像と面白さをつかむ）</option>
+        <option value="basic">基礎（分野の教科書）</option>
+        <option value="advanced">専門（必要な章を引いて使う）</option>
+      </select></label>
+      <label class="wide">出版社や CiNii のページの URL（分かれば）<input type="url" id="add-url" placeholder="https://"></label>
+      <label class="wide">身につくスキル<input type="text" id="add-skills" list="skill-options" placeholder="例：電力収支の計算">
+        <datalist id="skill-options">${field_skills.map((s) => `<option value="${escape_html(s.title)}"></option>`).join("")}</datalist></label>
+      <label class="wide">おすすめの理由・読み方<textarea id="add-reason" rows="2" placeholder="どの章が役に立つか、どんな人に向いているか など"></textarea></label>
+      <div class="form-actions">
+        <button type="submit" class="primary-btn">追加する</button>
+        <button type="button" class="text-btn" id="add-cancel">やめる</button>
+        <span class="form-msg" id="add-msg"></span>
+      </div>
+    </form>`;
+}
+
+function render_section() {
+  const track = state.tracks.find((t) => t.id === state.field) || state.tracks[0];
+  if (!track) return;
+  const books = state.books.filter((b) => b.field === track.id)
+    .sort((a, b) => LEVEL_ORDER.indexOf(a.level) - LEVEL_ORDER.indexOf(b.level));
+  const wanted = state.skills.filter((s) => s.field === track.id && s.books.length === 0);
+  const added = state.additions.filter((a) => a.field === track.id);
+
+  document.getElementById("sections").innerHTML = `
+    <section class="field-section" style="--c:${escape_html(track.color)}">
+      <div class="field-head">
+        <h2><span class="swatch" aria-hidden="true"></span>${escape_html(field_name(track))}</h2>
+        <p>${escape_html(track.description || "")}</p>
+      </div>
+      <h3>いま載っている本（${books.length} 冊）</h3>
+      ${books.map(book_row_html).join("") || '<p class="empty">まだ1冊もありません。下の「本を追加する」から書き足してください。</p>'}
+      ${wanted.length ? `<h3>本がまだないスキル</h3>${wanted.map(skill_row_html).join("")}` : ""}
+      <h3>追加した本（${added.length} 冊）</h3>
+      ${added.map((a) => added_row_html(a, track)).join("") || '<p class="empty">まだありません。</p>'}
+      ${add_form_html(track)}
+    </section>`;
+  bind_section(track);
+}
+
+function bind_section(track) {
+  const root = document.getElementById("sections");
+  // 必要度のボタン：同じものをもう一度押すと選び直し（未回答）に戻る
+  root.querySelectorAll(".book-row").forEach((row) => {
+    const id = row.dataset.book;
+    row.querySelectorAll(".rating button").forEach((btn) => btn.addEventListener("click", () => {
+      const r = { ...(state.ratings.get(id) || {}) };
+      r.rating = r.rating === btn.dataset.v ? null : btn.dataset.v;
+      state.ratings.set(id, r);
+      save_rating(id);
+      render_counts_only();
+      row.classList.toggle("rated-no", r.rating === "no");
+      row.querySelectorAll(".rating button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === r.rating)));
+    }));
+    const ta = row.querySelector("textarea");
+    ta.addEventListener("input", () => {
+      state.ratings.set(id, { ...(state.ratings.get(id) || {}), comment: ta.value });
+      schedule_text_save(`r:${id}`, () => save_rating(id));
+    });
+    ta.addEventListener("blur", () => flush_text_save(`r:${id}`, () => save_rating(id)));
+  });
+  root.querySelectorAll("input[data-skill]").forEach((input) => {
+    const id = input.dataset.skill;
+    input.addEventListener("input", () => {
+      state.skill_books.set(id, { text: input.value });
+      schedule_text_save(`s:${id}`, () => save_skill_books(id));
+    });
+    input.addEventListener("blur", () => flush_text_save(`s:${id}`, () => save_skill_books(id)));
+  });
+  // 追加した本の取り消し（ページの中で確かめてから消す）
+  root.querySelectorAll("[data-delete]").forEach((btn) => btn.addEventListener("click", () => {
+    state.confirm_delete = btn.dataset.delete; render_section();
+  }));
+  root.querySelector("[data-delete-no]")?.addEventListener("click", () => { state.confirm_delete = null; render_section(); });
+  root.querySelector("[data-delete-yes]")?.addEventListener("click", async (event) => {
+    const id = event.currentTarget.dataset.deleteYes;
+    state.confirm_delete = null;
+    try { await db.doc(`additions/${id}`).delete(); }
+    catch (error) { show_error(`取り消せませんでした（${error?.code || "原因不明"}）。`); }
+  });
+  // 追加フォーム
+  root.querySelector("#add-toggle")?.addEventListener("click", () => {
+    state.open_form = true; render_section(); document.getElementById("add-title")?.focus();
+  });
+  root.querySelector("#add-cancel")?.addEventListener("click", () => { state.open_form = false; render_section(); });
+  root.querySelector("#add-form")?.addEventListener("submit", (event) => submit_addition(event, track));
+}
+
+async function submit_addition(event, track) {
+  event.preventDefault();
+  const value = (id) => document.getElementById(id).value.trim();
+  const msg = document.getElementById("add-msg");
+  const body = {
+    field: track.id, title: value("add-title"), author: value("add-author"), level: value("add-level"),
+    url: value("add-url"), skills: value("add-skills"), reason: value("add-reason"), created_at: now_iso(),
+  };
+  if (!body.title) { msg.textContent = "書名を入れてください。"; document.getElementById("add-title").focus(); return; }
+  if (!body.level) { msg.textContent = "レベルを選んでください。"; document.getElementById("add-level").focus(); return; }
+  if (body.url && !is_https(body.url)) { msg.textContent = "URL は https:// で始まる形で入れてください。"; return; }
+  msg.textContent = "保存しています…";
+  try {
+    await db.collection("additions").add(body);
+    state.open_form = false;
+    render_section();
+  } catch (error) {
+    msg.textContent = `追加できませんでした（${error?.code || "原因不明"}）。もう一度押してください。`;
+  }
+}
+
+// 入力中の欄を作り直さないよう、ボタン操作では集計だけを描き直す
+function render_counts_only() { render_tally(); render_nav(); }
+function render() { render_tally(); render_nav(); render_section(); }
+
+// ---------- データベースとつなぐ ----------
+function subscribe_answers() {
+  let first = { ratings: false, skill_books: false, additions: false };
+  const timer = setTimeout(() => set_status("保存先のデータベースにつながりません。通信の状態を確かめてください（つながると自動で表示されます）。", true), LOAD_TIMEOUT_MS);
+  const mark_loaded = (name, snap) => {
+    if (snap.metadata.fromCache) return;
+    first[name] = true;
+    if (first.ratings && first.skill_books && first.additions) {
+      clearTimeout(timer);
+      set_status(can_write ? "" : "表示だけのモードです（保存はオーナーだけができます）。");
+    }
+  };
+  const on_error = (error) => { clearTimeout(timer); set_status(`答えを読み込めませんでした（${error.code}）。`, true); };
+  // ほかのタブで変えた内容も届く。入力中の欄は上書きしないよう、本の一覧を描き直すのは入力していないときだけ
+  const rerender_if_idle = () => {
+    const active = document.activeElement;
+    if (active && /^(TEXTAREA|INPUT|SELECT)$/.test(active.tagName)) render_counts_only();
+    else render();
+  };
+  db.collection("ratings").onSnapshot((snap) => {
+    snap.docs.forEach((d) => { if (!text_timers.has(`r:${d.id}`)) state.ratings.set(d.id, d.data()); });
+    mark_loaded("ratings", snap); rerender_if_idle();
+  }, on_error);
+  db.collection("skill_books").onSnapshot((snap) => {
+    snap.docs.forEach((d) => { if (!text_timers.has(`s:${d.id}`)) state.skill_books.set(d.id, d.data()); });
+    mark_loaded("skill_books", snap); rerender_if_idle();
+  }, on_error);
+  db.collection("additions").orderBy("created_at").onSnapshot((snap) => {
+    state.additions = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    mark_loaded("additions", snap); rerender_if_idle();
+  }, on_error);
+}
+
+async function main() {
+  try {
+    await load_catalog();
+  } catch (error) {
+    set_status("");
+    show_error(error.message);
+    return;
+  }
+  render();
+  set_status("保存先のデータベースにつないでいます…");
+  if (!(window.claude && typeof window.claude.use === "function")) {
+    set_status("このページは claude.ai で開いたときだけ答えを保存できます。今は表示だけです。", true);
+    return;
+  }
+  db = await window.claude.use("db");
+  if (!db) {
+    set_status("保存先のデータベースを使えません（サインインしているか確かめてください）。今は表示だけです。", true);
+    return;
+  }
+  const user = await window.claude.use("user");
+  const writable = user ? await user.can("data.write") : null;
+  can_write = writable !== false;
+  render();
+  subscribe_answers();
+}
+
+main();
+</script>

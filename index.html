@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>人工衛星開発への道</title>
+  <meta name="description" content="人工衛星開発に初めて取り組む大学生のための、スキルと本のロードマップ">
+  <!-- パスはすべて相対パス（./）にする。GitHub Pages の https://ユーザー名.github.io/リポジトリ名/ のような
+       サブパスで公開しても、ファイルの場所がずれないようにするため -->
+  <!-- ?v=… は版の印。ファイルを直したら数字を変えると、ブラウザが古いファイルを使い回さなくなる -->
+  <link rel="stylesheet" href="./style.css?v=9">
+  <!-- 外部ライブラリは js-yaml（YAML ファイルを JavaScript のデータに変える）だけ。ビルドの手順はいらない -->
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js" defer></script>
+  <script src="./app.js?v=9" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-text">
+        <h1>人工衛星開発への道</h1>
+        <p class="subtitle">Road to Satellite Development ― 本で進むロードマップ</p>
+        <p class="lead">
+          人工衛星の開発に必要な技術を、どの本を・どの順番で読めばよいかの地図にまとめました。
+          全部を専門家レベルで身につける必要はありません。全体像をつかんだら興味のある分野を選び、
+          入門 → 基礎 → 専門と読み進めて、設計・製造・試験のどこかに参加できる力をつけていきます。
+        </p>
+        <p class="mock-note">※ 試作版です。載せている本はすべて調べて挙げた候補で、チームではまだ決めていません。</p>
+      </div>
+      <dl class="overall-progress" aria-label="全体の進捗">
+        <div class="progress-row">
+          <dt>読んだ本</dt>
+          <dd><span id="overall-book-text">0 / 0</span><span class="bar"><span id="overall-book-bar" class="bar-fill book"></span></span></dd>
+        </div>
+        <div class="progress-row minor">
+          <dt>身についたスキル</dt>
+          <dd><span id="overall-skill-text">0 / 0</span><span class="bar"><span id="overall-skill-bar" class="bar-fill"></span></span></dd>
+        </div>
+        <p class="progress-note">チェックはこのブラウザにだけ保存されます（登録不要）。
+          <button type="button" id="reset-btn" class="text-btn">すべて外す</button></p>
+      </dl>
+    </div>
+  </header>
+
+  <div id="error-box" class="error-box" role="alert" hidden></div>
+
+  <section class="section" aria-labelledby="fields-title">
+    <div class="section-head">
+      <h2 id="fields-title">分野</h2>
+      <p class="section-note">分野名を押すと、その分野と「共通（全体像）」の本だけに絞り込みます。もう一度押すと元に戻ります。</p>
+    </div>
+    <div id="field-cards" class="field-cards"></div>
+  </section>
+
+  <section class="section roadmap-section" aria-labelledby="roadmap-title">
+    <div class="roadmap-head">
+      <h2 id="roadmap-title">読む順</h2>
+      <button type="button" id="show-all-btn" class="text-btn" hidden>絞り込みを外す</button>
+    </div>
+    <p id="roadmap-legend" class="legend"></p>
+
+    <div class="layout">
+      <div class="roadmap-scroll">
+        <div id="board" class="board"></div>
+      </div>
+      <aside id="detail" class="detail-panel" aria-live="polite">
+        <div class="detail-empty">
+          <p class="detail-empty-title">本を選んでください</p>
+          <p>本の名前を押すと、ここに書誌情報と、その本で身につくスキルが出ます。右上の □ を押すと「読んだ」のチェックが付きます。</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="goal-title">
+    <div class="section-head">
+      <h2 id="goal-title">その先：衛星開発の流れ</h2>
+      <p class="section-note">読んで身につけた力は、実際の衛星開発の次の工程で使います。工程どうし・分野どうしは、システムズエンジニアリングがつなぎます。</p>
+    </div>
+    <div id="process" class="process"></div>
+  </section>
+
+  <footer class="site-footer">
+    <p>分野・スキル・本のデータは <code>data/</code> フォルダの YAML ファイルにあり、後から追加・修正できます。
+      本はすべて CiNii または出版社のページで実在を確認したものだけを載せています。</p>
+  </footer>
+</body>
+</html>

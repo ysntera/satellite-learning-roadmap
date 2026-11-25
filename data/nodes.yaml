@@ -1,0 +1,1101 @@
+# スキル（学習項目）の一覧（スキルのロードマップ）
+# 前提（prerequisites）の並びは、大学の工学系の授業の履修順（力学→材料力学→振動工学、
+# 熱力学→伝熱工学、電気回路→電子回路→パワーエレクトロニクス、フィードバック制御→線形システム制御 など）を参考にしている。
+#
+# - id            : 英小文字とハイフン。チェックの保存にも使うので後から変えない
+# - title         : スキル名（初学者が分かる具体的な名前）
+# - field         : 分野の id（tracks.yaml）
+# - stage         : basic（基礎）/ applied（応用）/ practice（実践）。共通基礎は basic
+# - prerequisites : 先に身につけておくスキルの id（矢印の元になる）
+# - summary       : スキルの概要
+# - purpose       : 習得する目的（衛星開発のどこで使うか）
+# - learn         : 学ぶべき内容
+# - tools         : 使うツール・ソフトウェア・機材
+# - exercise      : 実践課題
+# - goal          : 習得目標・到達基準（「〜できる」の形）
+# - books         : 推奨する本・資料の id（books.yaml）。空なら「募集中」と表示
+# - events        : 関連する勉強会（任意）
+
+# =============================== 共通基礎 ===============================
+- id: c-math-phys
+  title: 数学・物理
+  field: common
+  stage: basic
+  prerequisites: []
+  summary: 線形代数・微積分・微分方程式・確率統計と、力学・電磁気学。すべての分野の計算の土台。
+  purpose: 軌道の計算、姿勢の回転、構造の強度、回路の解析など、衛星のあらゆる設計計算で使う。
+  learn:
+    - 線形代数（ベクトル・行列・座標変換）
+    - 微積分と常微分方程式（運動や温度の変化を式で表す）
+    - 力学（ニュートンの運動方程式・剛体の回転）と電磁気学
+    - 確率統計（測定値のばらつき・誤差）
+  tools: [Python（NumPy）, MATLAB]
+  exercise: ボールを投げたときの運動方程式を立て、Python で数値的に解いてグラフにする。
+  goal:
+    - 運動方程式を立てて、簡単なものは手で、難しいものはプログラムで解ける
+    - 回転行列で座標を変換できる
+  books: []
+
+- id: c-electric
+  title: 電気電子工学
+  field: common
+  stage: basic
+  prerequisites: [c-math-phys]
+  summary: 電気回路（オームの法則・キルヒホッフの法則）から、トランジスタやオペアンプを使った電子回路まで。
+  purpose: 電源・C&DH・通信・姿勢制御のセンサーなど、衛星の機器の多くは電子回路でできている。
+  learn:
+    - 電気回路（直流・交流、インピーダンス）
+    - 電子回路（ダイオード・トランジスタ・オペアンプ）
+    - デジタル回路の基礎（論理回路）
+  tools: [テスター, オシロスコープ, 安定化電源, LTspice（回路シミュレーター）]
+  exercise: ブレッドボードで LED とセンサーの回路を組み、テスターとオシロスコープで電圧を測る。
+  goal:
+    - 簡単な回路の電圧・電流を計算し、実際に測って確かめられる
+    - 回路図を読める
+  books: []
+
+- id: c-programming
+  title: プログラミング
+  field: common
+  stage: basic
+  prerequisites: []
+  summary: C言語と Python の基本、データ構造とアルゴリズム、Git によるコード管理。
+  purpose: 搭載ソフト（C言語）、解析・シミュレーション（Python）、チーム開発（Git）で使う。
+  learn:
+    - C言語（変数・条件分岐・繰り返し・関数・ポインタ）
+    - Python（数値計算・グラフ描画）
+    - データ構造とアルゴリズムの基礎
+    - Git と GitHub（コミット・ブランチ・プルリクエスト）
+  tools: [C コンパイラ（gcc）, Python, Git, VSCode]
+  exercise: センサーのデータ（CSV）を読み込み、平均・最大値を計算してグラフにするプログラムを書き、GitHub にプルリクエストを出す。
+  goal:
+    - C言語と Python で 100 行程度のプログラムを書ける
+    - Git でチーム開発の流れ（ブランチ→プルリクエスト→マージ）を回せる
+  books: []
+
+- id: c-mechanical
+  title: 機械工学
+  field: common
+  stage: basic
+  prerequisites: [c-math-phys]
+  summary: 材料力学・熱力学・流体力学の入口と、機械製図。
+  purpose: 構造・熱・製造試験の分野の土台になる。図面が読めると組立にも参加しやすい。
+  learn:
+    - 材料力学の基礎（応力・ひずみ・はりの曲げ）
+    - 熱力学の基礎（熱量・温度・エネルギー保存）
+    - 機械製図（三面図・公差）
+  tools: [3D CAD（Fusion 360 や SolidWorks など）, ノギス, マイクロメータ]
+  exercise: 身近な部品をノギスで測り、三面図を描く。
+  goal:
+    - はりに力がかかったときの応力を計算できる
+    - 図面を読んで部品の形と寸法が分かる
+  books: []
+
+- id: c-space
+  title: 宇宙工学の基礎
+  field: common
+  stage: basic
+  prerequisites: []
+  summary: 人工衛星とは何か、どんなミッションがあるか、衛星がどんなサブシステムでできているか。
+  purpose: 自分の分野が衛星全体のどこを担うのかを知り、興味のある分野を選ぶ手がかりにする。
+  learn:
+    - 衛星を構成するサブシステム（電源・熱・構造・C&DH・通信・姿勢制御）の役割
+    - 実在の超小型衛星のミッションと開発の経緯
+    - 衛星開発の流れ（ミッション定義→設計→製造→試験→打上げ→運用）
+  tools: [esa（記事にまとめる）]
+  exercise: 実在の衛星を1機選び、ミッション・構成・開発の経緯を esa の記事にまとめる（本日の衛星）。
+  goal:
+    - 衛星のサブシステムの名前と役割を説明できる
+    - 実在の衛星1機について、ミッションと開発の経緯を説明できる
+  books: [e-de-wakaru, tsukuru, cansat]
+  events: [本日の衛星（1人1機を調べて esa にまとめる）]
+
+# =============================== 電源（EPS） ===============================
+- id: eps-overview
+  title: 電源系の構成を知る
+  field: eps
+  stage: basic
+  prerequisites: [c-electric, c-space]
+  summary: 発電（太陽電池）・蓄電（バッテリー）・配電（電源制御）の3つで電源系ができていることを学ぶ。
+  purpose: 電源系の設計・試験に参加する前に、全体の構成と各部の役割を知る。
+  learn:
+    - 太陽電池・バッテリー・電源制御基板の役割
+    - 日照（太陽が見える時間）と日陰（地球の影に入る時間）
+    - バス電圧（衛星の中で配る電気の電圧）
+  tools: []
+  exercise: 実在の超小型衛星1機の電源系の構成図を描く。
+  goal: [衛星の電源系の構成を図で説明できる]
+  books: [tsukuru]
+
+- id: eps-components
+  title: 太陽電池とバッテリーの特性
+  field: eps
+  stage: basic
+  prerequisites: [eps-overview]
+  summary: 太陽電池の I-V 特性（電圧と電流の関係）と、リチウムイオン電池の充放電特性。
+  purpose: 部品を選び、どれだけ発電・蓄電できるかを見積もるために必要。
+  learn:
+    - 太陽電池の I-V 特性と最大電力点
+    - リチウムイオン電池の充放電・容量・寿命
+    - 温度による特性の変化
+  tools: [電子負荷, 安定化電源, データロガー]
+  exercise: 太陽電池セルにライトを当て、負荷を変えながら I-V カーブを測る。
+  goal: [I-V カーブから最大電力点を求められる]
+  books: [patel]
+
+- id: eps-power-budget
+  title: 電力収支の計算
+  field: eps
+  stage: applied
+  prerequisites: [eps-components, space-orbit-basics]
+  summary: 1周回の発電量と、各機器の消費電力を比べ、電気が足りるかを計算する（電力バジェット）。
+  purpose: 衛星の運用モードごとに、電気が足りるかを設計の段階で確かめる。
+  learn:
+    - 日照率と軌道の関係
+    - 機器ごとの消費電力と動作時間
+    - バッテリーの放電深度（どれだけ使ってよいか）
+  tools: [Excel, Python]
+  exercise: 機器リストと軌道から、運用モードごとの電力収支表を作る。
+  goal: [運用モードごとの電力収支表を作り、足りない場合の対策を示せる]
+  books: [patel]
+
+- id: eps-circuit
+  title: 電源回路の設計
+  field: eps
+  stage: applied
+  prerequisites: [eps-components]
+  summary: DC-DC コンバータ（電圧を変える回路）・充電回路・過電流保護回路の設計。
+  purpose: 電源基板の回路を自分で設計できるようになる。
+  learn:
+    - DC-DC コンバータの種類と効率
+    - 過電流・過放電の保護回路
+    - インヒビット（打上げ中に電源が入らないようにするスイッチ）
+  tools: [KiCad（回路図・基板設計）, LTspice]
+  exercise: 太陽電池からバッテリーを充電する回路を設計し、LTspice でシミュレーションする。
+  goal: [電源回路の回路図を描き、部品の選び方を説明できる]
+  books: [patel]
+
+- id: eps-board
+  title: 電源基板の製作と評価
+  field: eps
+  stage: practice
+  prerequisites: [eps-circuit]
+  summary: 設計した電源基板を作り、効率・リップル（電圧の細かい揺れ）・保護動作を測る。
+  purpose: 実際の衛星に載る電源基板を作れるようになる。
+  learn:
+    - 基板の発注と実装
+    - 効率・リップル・保護動作の測り方
+  tools: [KiCad, オシロスコープ, 電子負荷]
+  exercise: 電源基板の評価試験を行い、結果を試験報告書にまとめる。
+  goal: [電源基板の評価試験を計画・実施し、報告書にまとめられる]
+  books: []
+
+- id: eps-test
+  title: 電源系の試験
+  field: eps
+  stage: practice
+  prerequisites: [eps-board, eps-power-budget]
+  summary: バッテリーの保護機能試験、インヒビット試験、太陽電池パネルの発電試験など、電源系の試験。
+  purpose: 打上げ前の安全審査や環境試験で求められる電源系の試験を担当できるようになる。
+  learn:
+    - バッテリー保護機能試験・インヒビット試験の目的
+    - 試験の前後で特性が変わっていないかの確認
+  tools: [安定化電源, データロガー, ソーラーシミュレーター]
+  exercise: バッテリーの充放電特性を振動試験の前後で測り、比べる。
+  goal: [電源系の試験手順書を書き、試験を実施できる]
+  books: []
+
+# =============================== 熱 ===============================
+- id: thermal-transfer
+  title: 宇宙での熱の伝わり方
+  field: thermal
+  stage: basic
+  prerequisites: [c-mechanical, space-env]
+  summary: 真空では空気による熱の移動（対流）がなく、ふく射（光として出る熱）と伝導だけで熱が動く。
+  purpose: 地上と宇宙で温度の決まり方が違うことを理解する。熱設計の出発点。
+  learn:
+    - 伝導・ふく射の式
+    - 吸収率と放射率（表面の色や仕上げで熱の出入りが変わる）
+  tools: []
+  exercise: 黒い板と白い板（またはアルミ箔）にライトを当て、温度の上がり方の違いを測る。
+  goal: [ふく射と伝導の式を使って、簡単な熱の移動量を計算できる]
+  books: [netsu]
+  events: [宇宙環境の勉強会]
+
+- id: thermal-env
+  title: 衛星が受ける熱入力
+  field: thermal
+  stage: basic
+  prerequisites: [thermal-transfer, space-orbit-basics]
+  summary: 太陽光・アルベド（地球が反射した太陽光）・地球赤外放射の3つの熱入力と、日照・日陰での変化。
+  purpose: 衛星がどれだけ熱を受けるかを見積もるために必要。
+  learn:
+    - 太陽定数・アルベド・地球赤外放射
+    - 軌道上での熱入力の時間変化
+  tools: [Python]
+  exercise: 軌道1周の間の熱入力の変化を Python で計算してグラフにする。
+  goal: [軌道上での熱入力の変化を計算できる]
+  books: [netsu]
+
+- id: thermal-1node
+  title: 1節点モデルで温度を見積もる
+  field: thermal
+  stage: applied
+  prerequisites: [thermal-env]
+  summary: 衛星全体を1つの点（節点）とみなし、入ってくる熱と出ていく熱のつり合いから温度を求める。
+  purpose: 設計の初めに、衛星がだいたい何度になるかを手早く見積もる。
+  learn:
+    - 熱のつり合いの式
+    - 最高温度・最低温度のケース（高温ケース・低温ケース）
+  tools: [Excel, Python]
+  exercise: 1節点モデルで衛星の高温ケース・低温ケースの温度を計算する。
+  goal: [1節点モデルで衛星の温度範囲を見積もり、許容範囲と比べられる]
+  books: [netsu]
+
+- id: thermal-control
+  title: 熱制御の手段
+  field: thermal
+  stage: applied
+  prerequisites: [thermal-env]
+  summary: 塗装・テープ、MLI（多層断熱材）、ヒーター、熱伝導の経路など、温度を調整する手段。
+  purpose: 見積もった温度が許容範囲を外れたときに、どう対策するかを選べるようになる。
+  learn:
+    - 受動的な熱制御（表面処理・MLI・熱伝導の工夫）
+    - 能動的な熱制御（ヒーターとその制御）
+  tools: []
+  exercise: 1節点モデルの結果をもとに、表面の仕上げを変えたときの温度を比べる。
+  goal: [温度の問題に対して、熱制御の手段を選んで効果を説明できる]
+  books: [netsu, gilmore]
+
+- id: thermal-analysis
+  title: 多節点の熱解析
+  field: thermal
+  stage: practice
+  prerequisites: [thermal-1node, thermal-control, structure-cad]
+  summary: 衛星を多くの節点に分け、部品ごとの温度を計算する熱解析モデルを作る。
+  purpose: 機器ごとの温度を予測し、熱設計を確定させる。
+  learn:
+    - 熱数学モデル（節点と熱の通り道で表したモデル）の作り方
+    - 解析結果の読み方と、試験結果との比べ方
+  tools: [Thermal Desktop などの熱解析ソフト, Python]
+  exercise: 衛星を数十節点に分けた熱解析を1ケース回し、結果を設計審査用にまとめる。
+  goal: [熱解析モデルを作り、結果から設計の良し悪しを判断できる]
+  books: [gilmore]
+
+- id: thermal-tvt
+  title: 熱真空試験
+  field: thermal
+  stage: practice
+  prerequisites: [thermal-analysis]
+  summary: 真空槽の中で衛星を宇宙と同じような温度環境に置き、正しく動くか・解析と合っているかを確かめる。
+  purpose: 熱設計が正しいことを試験で確かめる。
+  learn:
+    - 熱真空試験の手順と温度サイクル
+    - 熱電対（温度センサー）の貼り方
+    - 解析モデルと試験結果の比べ方（モデルの補正）
+  tools: [熱真空チャンバー, 熱電対, データロガー]
+  exercise: 熱真空試験に参加し、試験結果を解析と比べる。
+  goal: [熱真空試験の手順を説明し、結果を解析と比べて考察できる]
+  books: []
+
+# =============================== 構造 ===============================
+- id: structure-strength
+  title: 材料力学で強度を確かめる
+  field: structure
+  stage: basic
+  prerequisites: [c-mechanical]
+  summary: 部品にかかる力から応力を計算し、材料が壊れないかを確かめる。
+  purpose: 打上げの荷重に耐える部品を設計するための基本。
+  learn:
+    - 応力・ひずみ・安全余裕（MS：どれだけ余裕があるか）
+    - 宇宙でよく使う材料（アルミ合金など）の性質
+  tools: [Excel]
+  exercise: 衛星の板にかかる荷重から応力を計算し、安全余裕を求める。
+  goal: [部品の応力を手計算し、安全余裕を求められる]
+  books: [kida]
+
+- id: structure-cad
+  title: 3D CAD の基本
+  field: structure
+  stage: basic
+  prerequisites: [c-mechanical]
+  summary: 部品の 3D モデルを作り、組立図・図面を描く。
+  purpose: 衛星の構造を設計し、ほかの分野と部品の配置をすり合わせるのに使う。
+  learn:
+    - スケッチ・押し出しなどの基本操作
+    - 組立（アセンブリ）と干渉チェック
+    - 図面の作成
+  tools: [Fusion 360, SolidWorks]
+  exercise: 1U CubeSat（10cm 角の衛星）の外枠をモデリングし、図面を描く。
+  goal: [部品をモデリングし、組立図と図面を作れる]
+  books: []
+
+- id: structure-vibration
+  title: 振動と固有振動数
+  field: structure
+  stage: applied
+  prerequisites: [structure-strength]
+  summary: 物体には揺れやすい振動数（固有振動数）があり、打上げの振動と重なると大きく揺れる（共振）。
+  purpose: ロケットから求められる固有振動数の条件を満たす構造を設計する。
+  learn:
+    - 1自由度・多自由度系の振動
+    - 固有振動数と共振
+    - 正弦波振動・ランダム振動
+  tools: [Python, MATLAB]
+  exercise: ばね-おもりモデルの固有振動数を計算し、加振したときの応答をシミュレーションする。
+  goal: [簡単なモデルの固有振動数を計算し、共振の意味を説明できる]
+  books: [kousetsu]
+
+- id: structure-design
+  title: 打上げに耐える構造設計
+  field: structure
+  stage: applied
+  prerequisites: [structure-strength, structure-cad, space-launch]
+  summary: ロケットの要求（荷重・固有振動数・寸法）を満たし、機器を載せられる構造を設計する。
+  purpose: 衛星の骨組みを設計できるようになる。
+  learn:
+    - ロケット・放出機構の要求の読み方
+    - 部品の配置と質量のバランス（重心）
+    - ねじ・締結部の設計
+  tools: [Fusion 360, SolidWorks]
+  exercise: 機器の配置を決め、重心の位置を CAD で確かめる。
+  goal: [要求を満たす構造の設計案を作り、レビューで説明できる]
+  books: [kida, wijker]
+
+- id: structure-fem
+  title: 有限要素法（FEM）解析
+  field: structure
+  stage: applied
+  prerequisites: [structure-design, structure-vibration]
+  summary: 構造を小さな要素に分けて、応力や固有振動数をコンピュータで計算する方法。
+  purpose: 手計算できない複雑な形の強度・固有振動数を確かめる。
+  learn:
+    - メッシュ（要素の分け方）と境界条件
+    - 静解析・モード解析（固有振動数の解析）
+    - 結果の妥当性の確かめ方
+  tools: [Ansys, Fusion 360 のシミュレーション機能]
+  exercise: 衛星の構造の固有振動数を FEM で求め、手計算と比べる。
+  goal: [FEM 解析を行い、結果が正しそうかを手計算で確かめられる]
+  books: [wijker]
+
+- id: structure-manufacture
+  title: 構造部品の製作
+  field: structure
+  stage: practice
+  prerequisites: [structure-design]
+  summary: 図面から部品を発注・加工し、寸法を検査する。
+  purpose: 設計した構造を実際の部品にする。
+  learn:
+    - 加工方法（切削・板金）と公差
+    - 業者への発注と図面のやり取り
+    - 寸法検査
+  tools: [ノギス, マイクロメータ, 3D プリンター（試作）]
+  exercise: 3D プリンターで構造の試作品を作り、組み立てて干渉を確かめる。
+  goal: [図面から部品を発注し、寸法検査で合否を判断できる]
+  books: []
+
+- id: structure-vib-test
+  title: 振動試験
+  field: structure
+  stage: practice
+  prerequisites: [structure-fem, structure-manufacture]
+  summary: 加振機で打上げの振動を再現し、衛星が壊れないか・固有振動数が解析と合っているかを確かめる。
+  purpose: 構造設計が正しいことを試験で確かめる。安全審査でも必要。
+  learn:
+    - 振動試験の条件（正弦波・ランダム）の読み方
+    - 加速度センサーの付け方
+    - 試験前後の比較（固有振動数のずれ）
+  tools: [振動試験機, 加速度センサー]
+  exercise: 振動試験に参加し、試験前後の固有振動数の変化を確かめる。
+  goal: [振動試験の条件と結果の見方を説明できる]
+  books: []
+
+# =============================== C&DH ===============================
+- id: cdh-mcu
+  title: マイコンの基礎
+  field: cdh
+  stage: basic
+  prerequisites: [c-programming, c-electric]
+  summary: マイコンで GPIO（ピンの入出力）・UART・I2C・SPI（機器どうしの通信方式）を使う。
+  purpose: 衛星のほとんどの機器はマイコンでつながっている。搭載ソフト開発の出発点。
+  learn:
+    - GPIO・タイマー・割り込み
+    - シリアル通信（UART・I2C・SPI）
+    - データシートの読み方
+  tools: [Arduino, STM32 マイコン, ロジックアナライザ]
+  exercise: I2C で温度センサーの値を読み、UART で PC に表示する。
+  goal: [データシートを読んで、センサーをマイコンにつないで値を読める]
+  books: []
+
+- id: cdh-embedded-c
+  title: 組込み C 言語
+  field: cdh
+  stage: basic
+  prerequisites: [c-programming]
+  summary: メモリが少なく、止まってはいけないマイコン向けの C 言語の書き方。
+  purpose: 衛星の中で何年も動き続けるソフトを書くための基礎。
+  learn:
+    - ビット演算とレジスタ操作
+    - 動的メモリを使わない書き方
+    - コーディング規約（MISRA C などの考え方）
+  tools: [gcc, STM32CubeIDE, Git]
+  exercise: リングバッファ（データをためる仕組み）を C 言語で作り、テストする。
+  goal: [メモリと実行時間を意識した C 言語のプログラムを書ける]
+  books: []
+
+- id: cdh-fsw
+  title: 搭載ソフトの構成
+  field: cdh
+  stage: applied
+  prerequisites: [cdh-mcu, cdh-embedded-c]
+  summary: 運用モード（起動・通常・省電力など）の状態遷移や、タスクの切り替えを設計する。
+  purpose: 衛星全体の動きを決めるソフトの設計ができるようになる。
+  learn:
+    - 状態遷移図（モードの切り替え）
+    - リアルタイム OS（RTOS：決まった時間で処理を回す OS）
+    - 機器の動作の順番（シーケンス）
+  tools: [FreeRTOS, 状態遷移図を描くツール]
+  exercise: 起動→通常→省電力のモード切り替えをマイコンで実装する。
+  goal: [搭載ソフトのモード設計を状態遷移図で示し、実装できる]
+  books: [eickhoff]
+
+- id: cdh-cmd-tlm
+  title: コマンドとテレメトリの設計
+  field: cdh
+  stage: applied
+  prerequisites: [cdh-fsw]
+  summary: 地上からの命令（コマンド）と衛星からのデータ（テレメトリ）の形式を決める。
+  purpose: 運用で何をどう送るかを決める。通信・地上局と一緒に設計する。
+  learn:
+    - パケットの形式（ヘッダー・データ・誤り検出）
+    - コマンドの種類と安全な実行（誤って実行しない工夫）
+    - データの保存（メモリ管理）
+  tools: [Python（地上側のデコーダー）]
+  exercise: テレメトリのパケット形式を決め、マイコンで作って PC でデコードする。
+  goal: [コマンド・テレメトリの仕様書を書き、送受信を実装できる]
+  books: [eickhoff]
+
+- id: cdh-fault
+  title: 故障への備え
+  field: cdh
+  stage: applied
+  prerequisites: [cdh-fsw]
+  summary: ウォッチドッグタイマー（止まったら自動で再起動する仕組み）や、放射線によるデータ化けへの対策。
+  purpose: 宇宙で誰も直せない衛星を、止まらないようにする。
+  learn:
+    - ウォッチドッグタイマーとリセット
+    - シングルイベント（放射線でビットが反転する現象）への対策
+    - 安全なモード（セーフモード）への移行
+  tools: [STM32 マイコン]
+  exercise: わざとプログラムを止め、ウォッチドッグで復帰することを確かめる。
+  goal: [起こりうる故障と、ソフトでの対策を説明できる]
+  books: [eickhoff, ma-handbook]
+
+- id: cdh-obc-board
+  title: OBC 基板の製作とデバッグ
+  field: cdh
+  stage: practice
+  prerequisites: [cdh-mcu]
+  summary: 搭載計算機（OBC）の基板を作り、ソフトを書き込んで動作を確かめる。
+  purpose: 衛星に載る計算機を作れるようになる。
+  learn:
+    - 基板の設計と実装
+    - デバッガでの不具合調査
+  tools: [KiCad, デバッガ（ST-LINK など）, オシロスコープ]
+  exercise: OBC 基板にソフトを書き込み、ほかの基板と通信できることを確かめる。
+  goal: [OBC 基板の不具合を、計測器とデバッガで切り分けられる]
+  books: []
+
+- id: cdh-sw-test
+  title: 搭載ソフトの試験
+  field: cdh
+  stage: practice
+  prerequisites: [cdh-cmd-tlm, cdh-fault, cdh-obc-board]
+  summary: すべてのコマンドの確認、長時間の連続動作試験など、ソフトが正しく動くことを確かめる。
+  purpose: 打上げ前の最後の1か月はソフトのバグ出しになることが多い。そのための力。
+  learn:
+    - 試験項目の洗い出し（全コマンド・全モード）
+    - 長時間連続動作試験
+    - バグの記録と修正の管理
+  tools: [Git, GitHub Issues]
+  exercise: 全コマンドの試験表を作り、1つずつ確かめて結果を記録する。
+  goal: [搭載ソフトの試験計画を立て、実施・記録できる]
+  books: []
+
+# =============================== 通信 ===============================
+- id: comm-radio
+  title: 無線の基礎
+  field: comm
+  stage: basic
+  prerequisites: [c-electric]
+  summary: 周波数・波長・変調（電波に情報をのせる方法）・デシベル（dB）の意味。
+  purpose: 通信の設計や地上局の運用で出てくる言葉と数字が分かるようになる。
+  learn:
+    - 周波数と波長
+    - 変調方式（FM・FSK など）
+    - デシベル（dB）の計算
+  tools: [SDR（ソフトウェア無線の受信機）]
+  exercise: SDR で FM ラジオやアマチュア無線の電波を受信し、周波数スペクトルを見る。
+  goal: [dB の計算ができ、変調の種類を説明できる]
+  books: [musen]
+
+- id: comm-license
+  title: アマチュア無線の資格と電波法
+  field: comm
+  stage: basic
+  prerequisites: [comm-radio]
+  summary: 衛星の電波を出す・地上局を運用するには、無線従事者の資格と無線局の免許が必要。
+  purpose: 衛星の運用に参加するための資格を取る。周波数調整や免許申請の流れも知る。
+  learn:
+    - アマチュア無線技士の試験範囲（無線工学・法規）
+    - 衛星の周波数調整と免許申請の流れ
+  tools: []
+  exercise: アマチュア無線技士の国家試験を受ける。
+  goal: [アマチュア無線技士の資格を取る]
+  books: [musen]
+
+- id: comm-antenna
+  title: アンテナと送受信機
+  field: comm
+  stage: applied
+  prerequisites: [comm-radio]
+  summary: アンテナの種類（ダイポール・八木など）と、送受信機の構成。
+  purpose: 衛星側・地上局側のアンテナと無線機を選び、調整できるようになる。
+  learn:
+    - アンテナの利得と指向性
+    - インピーダンス整合と VSWR（電波がうまく出ているかの指標）
+    - 送受信機の構成
+  tools: [アンテナアナライザ, SDR]
+  exercise: ダイポールアンテナを作り、アンテナアナライザで VSWR を測る。
+  goal: [アンテナの特性を測り、良し悪しを判断できる]
+  books: [toyoshima]
+
+- id: comm-link-budget
+  title: 回線設計
+  field: comm
+  stage: applied
+  prerequisites: [comm-radio, space-orbit-basics]
+  summary: 送信電力・アンテナ利得・距離による損失などを足し引きし、電波が地上まで届くかを計算する。
+  purpose: 衛星と地上局の通信が成り立つかを、設計の段階で確かめる。
+  learn:
+    - 自由空間損失
+    - 雑音と C/N（信号と雑音の比）
+    - 回線マージン（どれだけ余裕があるか）
+  tools: [Excel]
+  exercise: 衛星の高度と仰角を変えながら、回線設計表を作る。
+  goal: [回線設計表を作り、回線マージンを求められる]
+  books: [toyoshima, maral]
+
+- id: comm-ground
+  title: 地上局の構成と衛星の受信
+  field: comm
+  stage: applied
+  prerequisites: [comm-antenna, space-orbit-basics]
+  summary: アンテナ・回転台・無線機・PC でできた地上局で、衛星の電波を受信する。
+  purpose: 自分たちの衛星を運用するための地上局を作り、使えるようになる。
+  learn:
+    - 地上局の構成
+    - 衛星の追尾（アンテナを衛星の方向に向け続ける）
+    - ドップラー効果（衛星が動くことで周波数がずれる現象）の補正
+  tools: [Gpredict（衛星の追尾ソフト）, SDR, アンテナ回転台]
+  exercise: 実在のアマチュア衛星の電波を受信し、テレメトリをデコードする。
+  goal: [実在の衛星の電波を受信し、データを取り出せる]
+  books: []
+
+- id: comm-rf-test
+  title: 通信機の試験
+  field: comm
+  stage: practice
+  prerequisites: [comm-link-budget, comm-antenna]
+  summary: 送信電力・周波数・受信感度の測定や、実際の距離での通信試験。
+  purpose: 衛星の通信機が設計どおりに働くことを確かめる。
+  learn:
+    - 送信電力・周波数・受信感度の測り方
+    - 長距離通信試験
+  tools: [スペクトラムアナライザ, 減衰器, SDR]
+  exercise: 衛星の通信機の送信電力と周波数を測り、規定の範囲に入っているか確かめる。
+  goal: [通信機の試験を計画・実施し、回線設計と比べられる]
+  books: []
+
+- id: comm-operations
+  title: 地上局からの運用
+  field: comm
+  stage: practice
+  prerequisites: [comm-ground, cdh-cmd-tlm, comm-license]
+  summary: 打上げ後、地上局から衛星にコマンドを送り、テレメトリを受け取って衛星の状態を確かめる。
+  purpose: 衛星が宇宙で働く期間を支える。データを取ってはじめてミッションが成功する。
+  learn:
+    - 運用計画（パスごとに何をするか）
+    - 運用手順書と異常時の対応
+  tools: [Gpredict, 地上局ソフト]
+  exercise: 運用リハーサル（模擬の運用）に参加する。
+  goal: [運用手順書に沿ってコマンドを送り、テレメトリを確認できる]
+  books: [cubesat-hb]
+
+# =============================== 姿勢制御（ADCS） ===============================
+- id: adcs-attitude-rep
+  title: 姿勢の表し方
+  field: adcs
+  stage: basic
+  prerequisites: [c-math-phys]
+  summary: 衛星の向きを、回転行列・オイラー角・クォータニオン（回転を4つの数で表す方法）で表す。
+  purpose: 姿勢制御のすべての計算は、姿勢を数式で表すところから始まる。
+  learn:
+    - 座標系（慣性座標系・機体座標系）
+    - 回転行列・オイラー角・クォータニオン
+  tools: [Python（NumPy）, MATLAB]
+  exercise: クォータニオンで衛星を回転させ、3D で表示するプログラムを書く。
+  goal: [3つの表し方の間で姿勢を変換できる]
+  books: [rikigaku]
+  events: [姿勢制御 勉強会（グループで勉強 → 発表）]
+
+- id: adcs-dynamics
+  title: 剛体の回転運動
+  field: adcs
+  stage: basic
+  prerequisites: [c-math-phys]
+  summary: 慣性モーメントと、回転する物体の運動方程式（オイラーの運動方程式）。
+  purpose: 衛星にトルク（回す力）を加えたとき、どう回るかを計算できるようになる。
+  learn:
+    - 慣性モーメント（回しにくさ）
+    - オイラーの運動方程式
+    - 宇宙で衛星にかかる外乱トルク
+  tools: [Python, MATLAB]
+  exercise: 回転する衛星の運動方程式を数値的に解き、角速度の変化をグラフにする。
+  goal: [衛星の回転運動をシミュレーションできる]
+  books: [rikigaku, sidi]
+
+- id: adcs-sensors
+  title: センサーとアクチュエータ
+  field: adcs
+  stage: applied
+  prerequisites: [adcs-attitude-rep, c-electric]
+  summary: 姿勢を測るセンサー（太陽センサー・磁気センサー・ジャイロ）と、姿勢を変える装置（磁気トルカ・リアクションホイール）。
+  purpose: 衛星の大きさやミッションに合った機器を選べるようになる。
+  learn:
+    - 各センサーの原理と精度
+    - 磁気トルカ・リアクションホイールの原理
+  tools: [9軸センサー（加速度・ジャイロ・磁気）, マイコン]
+  exercise: 9軸センサーの値をマイコンで読み、向きを変えたときの変化を確かめる。
+  goal: [センサーとアクチュエータの特徴を比べ、選び方を説明できる]
+  books: [rikigaku, sidi]
+
+- id: adcs-determination
+  title: 姿勢決定
+  field: adcs
+  stage: applied
+  prerequisites: [adcs-sensors]
+  summary: 複数のセンサーの値を組み合わせて、衛星の今の姿勢を求める。
+  purpose: 制御する前に、今どちらを向いているかを正しく知る必要がある。
+  learn:
+    - TRIAD 法など、2つの方向から姿勢を求める方法
+    - カルマンフィルタ（雑音のある測定値から状態を推定する方法）の考え方
+  tools: [Python, MATLAB]
+  exercise: 太陽の方向と磁場の方向から姿勢を求めるプログラムを書く。
+  goal: [センサーの値から姿勢を求めるプログラムを書ける]
+  books: [markley]
+
+- id: adcs-control
+  title: 制御則
+  field: adcs
+  stage: applied
+  prerequisites: [adcs-dynamics, adcs-sensors]
+  summary: デタンブリング（放出直後の回転を止める制御）や、目標の姿勢に向けるフィードバック制御。
+  purpose: 衛星を目標の向きに向けるための計算方法（制御則）を作る。
+  learn:
+    - フィードバック制御（PID 制御）
+    - B-dot 制御（磁場の変化から回転を止める方法）
+    - 安定性の考え方
+  tools: [MATLAB / Simulink, Python]
+  exercise: B-dot 制御で衛星の回転が止まることをシミュレーションで確かめる。
+  goal: [制御則を設計し、シミュレーションで効果を示せる]
+  books: [sidi, kida-ctrl]
+
+- id: adcs-simulation
+  title: 姿勢制御シミュレーション
+  field: adcs
+  stage: practice
+  prerequisites: [adcs-control, adcs-determination]
+  summary: 軌道・外乱・センサーの誤差まで入れたシミュレーターで、姿勢制御系全体を確かめる。
+  purpose: 打上げ前に、実際に近い条件で姿勢制御が成り立つかを確かめる。
+  learn:
+    - 軌道と磁場モデルの組み込み
+    - センサーの誤差・遅れの入れ方
+  tools: [MATLAB / Simulink, Python]
+  exercise: 姿勢決定と制御を組み合わせたシミュレーションを作り、目標の精度に入るか確かめる。
+  goal: [姿勢制御系全体のシミュレーションを作り、性能を評価できる]
+  books: [markley, hughes]
+
+- id: adcs-hils
+  title: 実機を使った姿勢制御試験
+  field: adcs
+  stage: practice
+  prerequisites: [adcs-simulation]
+  summary: ヘルムホルツコイル（磁場を作る装置）や回転台を使い、実際の機器とソフトで姿勢制御を試す。
+  purpose: シミュレーションどおりに実機が動くかを確かめる。
+  learn:
+    - HILS（実機とシミュレーションをつないだ試験）の考え方
+    - 磁場環境の作り方
+  tools: [ヘルムホルツコイル, 回転台, 磁気センサー]
+  exercise: ヘルムホルツコイルの中でデタンブリングの動作を確かめる。
+  goal: [実機試験を計画し、シミュレーションと比べて考察できる]
+  books: []
+
+# =============================== システム（SE） ===============================
+- id: system-overview
+  title: 衛星システムの全体像
+  field: system
+  stage: basic
+  prerequisites: [c-space]
+  summary: 各サブシステムがどうつながって1機の衛星になるか（電力・データ・熱・機械のつながり）。
+  purpose: 自分の分野の設計が、ほかの分野にどう影響するかを考えられるようになる。
+  learn:
+    - システム構成図（ブロック図）
+    - インターフェース（分野どうしの取り決め：電気・データ・機械）
+  tools: [draw.io などの作図ツール]
+  exercise: 実在の超小型衛星のシステム構成図を描く。
+  goal: [衛星のシステム構成図を描き、分野間のつながりを説明できる]
+  books: [tsukuru, kida]
+
+- id: system-ma
+  title: ミッションアシュアランス（失敗から学ぶ）
+  field: system
+  stage: basic
+  prerequisites: [system-overview]
+  summary: 大学衛星でよく起きた失敗と、それを防ぐための「やってはいけないこと」。
+  purpose: 先人の失敗を知り、同じ失敗をしない開発の進め方を身につける。
+  learn:
+    - 大学衛星の失敗事例と教訓
+    - 身の丈に合ったミッションとスケジュール
+  tools: []
+  exercise: ハンドブックの担当章を読み、輪読会で発表する。
+  goal: [大学衛星でよくある失敗と、その防ぎ方を説明できる]
+  books: [ma-handbook]
+  events: [ミッションアシュアランス・ハンドブックの輪読と理解度テスト]
+
+- id: system-se
+  title: システムズエンジニアリングの考え方
+  field: system
+  stage: basic
+  prerequisites: [system-overview]
+  summary: ミッション → 要求 → 設計 → 検証の流れと、V字モデル（設計と検証の対応を表した図）。
+  purpose: 大きなものを、抜けもれなく作るための考え方を身につける。
+  learn:
+    - V字モデル
+    - ライフサイクル（開発の段階と審査）
+    - モデルベースシステムズエンジニアリング（MBSE）の入口
+  tools: [SysML のモデリングツール（入門）]
+  exercise: 身近な製品（例：自転車）で、要求→機能→部品の分解をやってみる。
+  goal: [V字モデルを使って、開発の進め方を説明できる]
+  books: [nasa-se, mbse-intro]
+  events: [システムズエンジニアリング（SE）ワークショップ]
+
+- id: system-mission
+  title: ミッション定義とサクセスクライテリア
+  field: system
+  stage: applied
+  prerequisites: [system-ma, system-se]
+  summary: 衛星で何をするか（ミッション）と、どこまでできたら成功か（ミニマム・フル・エクストラの3段階）を決める。
+  purpose: 衛星開発のすべての出発点。ここがぶれると全体がぶれる。
+  learn:
+    - ミッションの考え方（教育・技術実証・科学観測）
+    - サクセスクライテリアの書き方（できるだけ数字で）
+  tools: []
+  exercise: 自分で考えたミッション案と、3段階のサクセスクライテリアを書いて発表する。
+  goal: [ミッションとサクセスクライテリアを数値で書ける]
+  books: [harukanaru, soa]
+
+- id: system-requirements
+  title: 要求の分解と要求管理
+  field: system
+  stage: applied
+  prerequisites: [system-mission]
+  summary: ミッションから、システム・サブシステムへの要求に分けていき、検証方法と結びつけて管理する。
+  purpose: 「何を作れば良いか」を各分野に正しく伝える。
+  learn:
+    - 要求の書き方（検証できる書き方）
+    - 要求の分解（ツリー）と追跡
+    - 要求と検証方法の対応表（検証マトリクス）
+  tools: [スプレッドシート, 要求管理ツール]
+  exercise: ミッション案から、各分野への要求を10個ほど書き出す。
+  goal: [検証できる形で要求を書き、分解できる]
+  books: [nasa-se, fortescue]
+
+- id: system-budget
+  title: バジェット管理
+  field: system
+  stage: applied
+  prerequisites: [system-requirements]
+  summary: 質量・電力・データ量・通信量などを、分野ごとに配分して合計を管理する（バジェット）。
+  purpose: 衛星全体として質量オーバーや電力不足にならないようにする。
+  learn:
+    - 質量・電力・データ・回線のバジェット
+    - マージン（余裕）の取り方
+  tools: [スプレッドシート]
+  exercise: 衛星の質量バジェット表を作り、マージンを設定する。
+  goal: [バジェット表を作り、マージンを管理できる]
+  books: [smad, fortescue]
+
+- id: system-review
+  title: 設計審査（MDR・PDR・CDR）
+  field: system
+  stage: practice
+  prerequisites: [system-budget]
+  summary: ミッション定義審査（MDR）・基本設計審査（PDR）・詳細設計審査（CDR）の準備と進め方。
+  purpose: 設計の節目で、外部の目も入れて確かめる。
+  learn:
+    - 審査の目的と、各審査で見せるもの
+    - 指摘事項の管理
+  tools: [esa, スライド]
+  exercise: 審査の資料作りと、指摘事項の一覧づくりを担当する。
+  goal: [審査の資料を準備し、指摘事項を管理できる]
+  books: [smad, cubesat-hb]
+
+- id: system-project
+  title: スケジュールとリスク管理
+  field: system
+  stage: practice
+  prerequisites: [system-ma, system-requirements]
+  summary: 打上げ日から逆算したスケジュールと、起こりそうな問題（リスク）への備え。
+  purpose: 打上げに間に合わせる。学生プロジェクトでは特に大事。
+  learn:
+    - 納入日から逆算したマイルストーン
+    - リスクの洗い出しと対策
+    - プレモーテム（失敗したと仮定して原因を考える方法）
+  tools: [ガントチャート, スプレッドシート]
+  exercise: 自分の分野のスケジュールとリスク一覧を作る。
+  goal: [ガントチャートとリスク一覧を作り、遅れへの対策を示せる]
+  books: [ma-handbook, nasa-se]
+
+# =============================== 宇宙工学 ===============================
+- id: space-env
+  title: 宇宙環境
+  field: space
+  stage: basic
+  prerequisites: [c-space]
+  summary: 真空・放射線・原子状酸素・熱など、衛星が置かれる環境と、それが衛星に与える影響。
+  purpose: 地上で動くものが宇宙では動かない理由を知る。すべての分野の設計に関わる。
+  learn:
+    - 真空（アウトガス・放電）
+    - 放射線（全吸収線量・シングルイベント）
+    - 原子状酸素・紫外線・温度変化
+  tools: []
+  exercise: 宇宙環境の勉強会で担当テーマを調べ、発表する。
+  goal: [宇宙環境の種類と、衛星への影響を説明できる]
+  books: [tribble]
+  events: [宇宙環境の勉強会]
+
+- id: space-orbit-basics
+  title: 軌道の基礎
+  field: space
+  stage: basic
+  prerequisites: [c-math-phys]
+  summary: ケプラーの法則、軌道要素（軌道の形と向きを表す6つの数）、TLE（軌道を表す2行のデータ）。
+  purpose: 衛星がいつどこにいるかが分かると、電力・熱・通信の設計ができる。
+  learn:
+    - ケプラーの法則と円軌道の速度
+    - 軌道要素
+    - TLE の読み方
+  tools: [Python（skyfield などのライブラリ）, Gpredict]
+  exercise: 実在の衛星の TLE から、自分の場所で見える時刻を予測する。
+  goal: [TLE から衛星の位置と通過時刻を予測できる]
+  books: [uchukogaku, kido]
+
+- id: space-launch
+  title: 打上げと放出
+  field: space
+  stage: applied
+  prerequisites: [space-orbit-basics]
+  summary: ロケットの相乗りや ISS からの放出など、超小型衛星が宇宙に行く方法と、そのときの環境（振動・加速度）。
+  purpose: 打上げ手段によって、衛星への要求（大きさ・振動条件・安全審査）が変わる。
+  learn:
+    - 打上げ手段の種類（相乗り・ISS 放出）
+    - 打上げ時の振動・加速度
+    - 放出機構の要求
+  tools: []
+  exercise: 打上げ手段を2つ比べ、衛星への要求の違いを表にまとめる。
+  goal: [打上げ手段ごとの要求の違いを説明できる]
+  books: [uchukogaku]
+
+- id: space-orbit-design
+  title: 軌道の選び方と軌道寿命
+  field: space
+  stage: applied
+  prerequisites: [space-orbit-basics]
+  summary: 高度・軌道傾斜角による違い（日照時間・通信できる時間・観測できる場所）と、大気抵抗による軌道寿命。
+  purpose: ミッションに合った軌道を選び、どれくらい宇宙にいられるかを見積もる。
+  learn:
+    - 太陽同期軌道など代表的な軌道
+    - 大気抵抗と軌道寿命
+    - スペースデブリ対策のルール
+  tools: [GMAT（NASA の軌道解析ソフト）, Python]
+  exercise: 高度を変えたときの軌道寿命を計算して比べる。
+  goal: [ミッションに合った軌道を選び、理由を説明できる]
+  books: [kido, curtis]
+
+- id: space-radiation
+  title: 放射線と宇宙環境への対策
+  field: space
+  stage: applied
+  prerequisites: [space-env]
+  summary: 部品の放射線への強さの見積もりと、シールド・部品選定・ソフトでの対策。
+  purpose: 民生部品（市販の部品）を使う超小型衛星で、放射線による故障を減らす。
+  learn:
+    - 放射線の量の見積もり
+    - 民生部品の選び方と放射線試験
+  tools: [SPENVIS（宇宙環境の計算ツール）]
+  exercise: 自分たちの軌道での1年間の放射線量を見積もる。
+  goal: [軌道上の放射線量を見積もり、対策を提案できる]
+  books: [tribble]
+
+- id: space-mission-analysis
+  title: ミッション解析
+  field: space
+  stage: practice
+  prerequisites: [space-orbit-design]
+  summary: 軌道の計算から、地上局と通信できる時間・日照率・観測できる場所などを求める。
+  purpose: 電源・熱・通信・ミッションの設計に必要な数字を、軌道から出してほかの分野に渡す。
+  learn:
+    - 可視時間（地上局から見える時間）の計算
+    - 日照率・ビーム角の計算
+  tools: [GMAT, Python]
+  exercise: 地上局からの1日あたりの通信可能時間を計算し、運用計画の案を作る。
+  goal: [軌道からミッション解析の数字を出し、ほかの分野に渡せる]
+  books: [curtis, smad]
+
+- id: space-safety
+  title: 安全審査と打上げ機関との調整
+  field: space
+  stage: practice
+  prerequisites: [space-launch, system-requirements]
+  summary: 打上げ機関が求める安全要求（バッテリー・インヒビット・構造など）を満たしていることを示す。
+  purpose: 安全審査を通らないと打ち上げられない。早めの準備が必要。
+  learn:
+    - 安全審査のフェーズと提出書類
+    - 要求と試験の対応表
+  tools: [スプレッドシート]
+  exercise: 安全要求の一覧と、それぞれを確かめる試験の対応表を作る。
+  goal: [安全要求と試験の対応を整理し、審査書類の準備に参加できる]
+  books: [ma-handbook]
+
+# =============================== 製造試験（AIT） ===============================
+- id: ait-tools
+  title: 工具と計測器の使い方
+  field: ait
+  stage: basic
+  prerequisites: [c-electric]
+  summary: テスター・オシロスコープ・安定化電源・トルクレンチなど、組立と試験で使う道具。
+  purpose: 組立・試験の現場に参加するための最初のステップ。
+  learn:
+    - 計測器の使い方と注意点
+    - トルク管理（ねじを決まった力で締める）
+  tools: [テスター, オシロスコープ, 安定化電源, トルクレンチ]
+  exercise: 基板の各点の電圧を測り、記録表に書く。
+  goal: [計測器を正しく使い、測定値を記録できる]
+  books: []
+
+- id: ait-soldering
+  title: はんだ付けと配線
+  field: ait
+  stage: basic
+  prerequisites: [ait-tools]
+  summary: 基板へのはんだ付けと、機器どうしをつなぐケーブル（ハーネス）の製作。
+  purpose: 衛星の不具合の多くは配線やはんだの不良から起きる。正しい作業を身につける。
+  learn:
+    - はんだ付けの良し悪しの見分け方
+    - ハーネスの製作と導通確認
+  tools: [はんだごて, ルーペ, テスター]
+  exercise: 練習用の基板とハーネスを作り、検査を受ける。
+  goal: [宇宙用の基準に沿ったはんだ付けとハーネス製作ができる]
+  books: []
+
+- id: ait-cleanliness
+  title: 部品管理と静電気・汚れ対策
+  field: ait
+  stage: basic
+  prerequisites: []
+  summary: 部品の管理（記録・保管）、静電気（ESD）対策、クリーンな環境での作業。
+  purpose: 部品の取り違えや静電気による故障を防ぐ。
+  learn:
+    - 部品の受け入れ検査と記録
+    - 静電気対策（リストストラップなど）
+    - 作業記録の付け方
+  tools: [リストストラップ, 部品管理表]
+  exercise: 部品の受け入れ検査をし、管理表に記録する。
+  goal: [部品の管理と静電気対策のルールを守って作業できる]
+  books: []
+
+- id: ait-models
+  title: 開発モデル（BBM・EM・FM）の進め方
+  field: ait
+  stage: applied
+  prerequisites: [system-overview]
+  summary: 原理を試す BBM、設計を確かめる EM、本番の FM と、段階を踏んで作る進め方。
+  purpose: どの段階で何を確かめるかを理解し、作業の目的を見失わないようにする。
+  learn:
+    - 各モデルの目的と作り方の違い
+    - モデルごとの試験の違い
+  tools: []
+  exercise: これまでの衛星の開発記録から、各モデルで何を確かめたかを整理する。
+  goal: [各モデルの目的と、確かめることを説明できる]
+  books: [kida, ma-handbook]
+
+- id: ait-test-planning
+  title: 試験計画と検証マトリクス
+  field: ait
+  stage: applied
+  prerequisites: [system-requirements, ait-models]
+  summary: 要求ごとに、どの試験・解析で確かめるかを決め（検証マトリクス）、試験の手順書を書く。
+  purpose: 抜けもれなく試験し、要求を満たしていることを示す。
+  learn:
+    - 検証の方法（試験・解析・検査・デモ）
+    - 試験手順書と試験報告書の書き方
+  tools: [スプレッドシート]
+  exercise: 1つの試験の手順書を書き、レビューを受ける。
+  goal: [試験手順書を書き、検証マトリクスに結果を反映できる]
+  books: [nasa-se]
+
+- id: ait-integration
+  title: 衛星の組立と統合
+  field: ait
+  stage: practice
+  prerequisites: [ait-soldering, ait-cleanliness, ait-models]
+  summary: 各分野の機器を1機の衛星に組み立て、電気的・機械的につないで動作を確かめる。
+  purpose: 分野ごとに作ったものを、1つの衛星として動かす。
+  learn:
+    - 組立手順書と作業記録
+    - 統合後の電気的な確認（導通・絶縁・電源投入）
+  tools: [組立治具, トルクレンチ, テスター]
+  exercise: EM の組立に参加し、手順書どおりに作業して記録を残す。
+  goal: [組立手順書に沿って組立・統合作業ができる]
+  books: []
+
+- id: ait-env-test
+  title: 環境試験への参加
+  field: ait
+  stage: practice
+  prerequisites: [ait-test-planning, ait-integration]
+  summary: 振動試験・熱真空試験など、打上げと宇宙の環境を再現した試験を衛星全体で行う。
+  purpose: 衛星全体が打上げと宇宙の環境に耐えることを確かめる。
+  learn:
+    - 環境試験の流れと、試験の前後で行う機能確認
+    - 試験設備の使い方と安全
+  tools: [振動試験機, 熱真空チャンバー]
+  exercise: 環境試験に参加し、試験の前後の機能確認を担当する。
+  goal: [環境試験の流れを説明し、試験の一部を担当できる]
+  books: []
+
+- id: ait-e2e
+  title: 一気通貫（E2E）試験
+  field: ait
+  stage: practice
+  prerequisites: [ait-integration, comm-rf-test]
+  summary: 地上局からコマンドを送り、衛星がミッションを行い、データが地上に届くまでを通しで確かめる。
+  purpose: 運用と同じ流れで衛星全体が動くことを、打上げ前に確かめる。
+  learn:
+    - E2E 試験の計画
+    - 長期運用試験（何日も連続で動かす試験）
+  tools: [地上局, 衛星（EM・FM）]
+  exercise: E2E 試験の手順を作り、実施に参加する。
+  goal: [E2E 試験を計画・実施し、問題を切り分けられる]
+  books: []

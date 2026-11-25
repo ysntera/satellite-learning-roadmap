@@ -1,0 +1,487 @@
+# 本・資料の一覧（本のロードマップ）
+# どの本も CiNii または出版社のページで実在と発行年を確認済み（2026-11-24）。
+# url は出版社のページ、なければ CiNii。架空の本・未確認の URL は載せない。
+#
+# - id        : 英小文字とハイフン。nodes.yaml の books から参照する。後から変えない
+# - title / author / publisher / year : 書誌情報
+# - type      : book（書籍）/ handbook（ハンドブック・公開資料）
+# - field     : どの分野の列に置くか（tracks.yaml の id）
+# - level     : intro（入門）/ basic（基礎）/ advanced（専門）
+# - lang      : ja / en
+# - free      : true なら無料で読める
+# - next      : この本の次に読むとよい本の id（読む順の矢印になる）
+# - note      : ひとこと
+# - candidate : true なら「候補」（調べて挙げただけで、チームで確定していない）
+
+# ---------------- 共通（衛星開発の全体像） ----------------
+- id: e-de-wakaru
+  title: 絵でわかる宇宙開発の技術
+  author: 藤井孝藏・並木道義
+  publisher: 講談社
+  year: 2013
+  url: "https://ci.nii.ac.jp/books/search?q=%E7%B5%B5%E3%81%A7%E3%82%8F%E3%81%8B%E3%82%8B%E5%AE%87%E5%AE%99%E9%96%8B%E7%99%BA%E3%81%AE%E6%8A%80%E8%A1%93"
+  type: book
+  field: common
+  level: intro
+  lang: ja
+  next: [tsukuru]
+  note: 図が多く、最初に読む読み物向き
+  candidate: true
+
+- id: tsukuru
+  title: 人工衛星をつくる ―設計から打ち上げまで―
+  author: 宮崎康行
+  publisher: オーム社
+  year: 2011
+  url: "https://www.ohmsha.co.jp/book/9784274503719.html"
+  type: book
+  field: common
+  level: intro
+  lang: ja
+  next: [cansat, kida, uchukogaku, netsu, patel, eickhoff]
+  note: 超小型衛星の企画から運用までを1冊で見渡せる。最初の1冊に
+  candidate: true
+
+- id: cansat
+  title: CanSat ―超小型模擬人工衛星―
+  author: 大学宇宙工学コンソーシアム 編
+  publisher: オーム社
+  year: 2014
+  url: "https://ci.nii.ac.jp/ncid/BB16456047"
+  type: book
+  field: common
+  level: intro
+  lang: ja
+  next: [kida]
+  note: 小さな実例で、設計・製作・試験の進め方を学べる
+  candidate: true
+
+- id: microsat
+  title: マイクロサット開発入門
+  author: 東北大学超小型衛星開発チーム
+  publisher: 東北大学出版会
+  year: 2011
+  url: "https://ci.nii.ac.jp/books/search?q=%E3%83%9E%E3%82%A4%E3%82%AF%E3%83%AD%E3%82%B5%E3%83%83%E3%83%88%E9%96%8B%E7%99%BA%E5%85%A5%E9%96%80"
+  type: book
+  field: common
+  level: intro
+  lang: ja
+  next: [kida]
+  note: 大学チームによる開発の記録
+  candidate: true
+
+- id: anatano
+  title: あなたの超小型衛星を作ってみませんか？ ―設計・製作から運用まで―
+  author: 久野治義・長谷部信行
+  publisher: 恒星社厚生閣
+  year: 2026
+  url: "https://ci.nii.ac.jp/books/search?q=%E3%81%82%E3%81%AA%E3%81%9F%E3%81%AE%E8%B6%85%E5%B0%8F%E5%9E%8B%E8%A1%9B%E6%98%9F%E3%82%92%E4%BD%9C%E3%81%A3%E3%81%A6%E3%81%BF%E3%81%BE%E3%81%9B%E3%82%93%E3%81%8B"
+  type: book
+  field: common
+  level: intro
+  lang: ja
+  next: [kida]
+  note: Ver.1.1。設計・製作から運用まで
+  candidate: true
+
+- id: kida
+  title: 人工衛星と宇宙探査機（増補）
+  author: 木田隆・小松敬治・川口淳一郎
+  publisher: コロナ社
+  year: 2022
+  url: "https://www.coronasha.co.jp/np/isbn/9784339012316"
+  type: book
+  field: common
+  level: basic
+  lang: ja
+  next: [smad, kousetsu, rikigaku]
+  note: 軌道・姿勢・構造・試験まで幅広く扱う。全体像をつかんだ後の参照用
+  candidate: true
+
+# ---------------- 電源 ----------------
+- id: patel
+  title: Spacecraft Power Systems（2nd ed.）
+  author: Mukund R. Patel・Omid Beik
+  publisher: CRC Press
+  year: 2024
+  url: "https://ci.nii.ac.jp/books/search?q=Spacecraft%20power%20systems"
+  type: book
+  field: eps
+  level: advanced
+  lang: en
+  next: []
+  note: 太陽電池・バッテリー・配電。日本語の専門書は見つかっていない
+  candidate: true
+
+# ---------------- 熱 ----------------
+- id: netsu
+  title: 宇宙機の熱設計
+  author: 大西晃 他編
+  publisher: 名古屋大学出版会
+  year: 2021
+  url: "https://www.unp.or.jp/ISBN/ISBN978-4-8158-1042-9.html"
+  type: book
+  field: thermal
+  level: basic
+  lang: ja
+  next: [gilmore]
+  note: 熱設計の日本語の定番（旧版2014）。19,800円と高いので団体で1冊
+  candidate: true
+
+- id: gilmore
+  title: Spacecraft Thermal Control Handbook, Vol. 1（2nd ed.）
+  author: David G. Gilmore 編
+  publisher: Aerospace Press
+  year: 2002
+  url: "https://ci.nii.ac.jp/books/search?q=Spacecraft%20thermal%20control%20handbook"
+  type: book
+  field: thermal
+  level: advanced
+  lang: en
+  next: []
+  note: 英語の定番
+  candidate: true
+
+# ---------------- 構造 ----------------
+- id: kousetsu
+  title: 構造振動学の基礎
+  author: 幸節雄二
+  publisher: 九州大学出版会
+  year: 2010
+  url: "https://ci.nii.ac.jp/books/search?q=%E6%A7%8B%E9%80%A0%E6%8C%AF%E5%8B%95%E5%AD%A6%E3%81%AE%E5%9F%BA%E7%A4%8E"
+  type: book
+  field: structure
+  level: basic
+  lang: ja
+  next: [wijker]
+  note: 振動の基礎から、衛星のような宙に浮いた構造物の振動まで（書誌は要再確認）
+  candidate: true
+
+- id: wijker
+  title: Spacecraft Structures
+  author: J. Jaap Wijker
+  publisher: Springer
+  year: 2008
+  url: "https://ci.nii.ac.jp/books/search?q=Spacecraft%20structures%20Wijker"
+  type: book
+  field: structure
+  level: advanced
+  lang: en
+  next: []
+  note: 英語・専門
+  candidate: true
+
+# ---------------- C&DH ----------------
+- id: eickhoff
+  title: Onboard Computers, Onboard Software and Satellite Operations
+  author: Jens Eickhoff
+  publisher: Springer
+  year: 2012
+  url: "https://ci.nii.ac.jp/books/search?q=Onboard%20computers%20onboard%20software%20and%20satellite%20operations"
+  type: book
+  field: cdh
+  level: advanced
+  lang: en
+  next: []
+  note: 搭載計算機・搭載ソフト・運用の入門（英語）。日本語の衛星専用書は見つかっていない
+  candidate: true
+
+# ---------------- 通信 ----------------
+- id: musen
+  title: 解説・無線工学 ―第1級・第2級アマチュア無線技士国家試験用―
+  author: 野口幸雄
+  publisher: CQ出版
+  year: 2019
+  url: "https://ci.nii.ac.jp/books/search?q=%E8%A7%A3%E8%AA%AC%E3%83%BB%E7%84%A1%E7%B7%9A%E5%B7%A5%E5%AD%A6"
+  type: book
+  field: comm
+  level: intro
+  lang: ja
+  next: [toyoshima]
+  note: 資格試験用。電波法は総務省の最新情報も確認する
+  candidate: true
+
+- id: toyoshima
+  title: 衛星通信ネットワーク ―スペースICTの基盤と応用―
+  author: 豊嶋守生
+  publisher: オーム社
+  year: 2026
+  url: "https://www.ohmsha.co.jp/book/9784274235108.html"
+  type: book
+  field: comm
+  level: basic
+  lang: ja
+  next: [maral]
+  note: 2026年9月刊。回線設計の章もある
+  candidate: true
+
+- id: maral
+  title: Satellite Communications Systems（5th ed.）
+  author: Gérard Maral・Michel Bousquet
+  publisher: Wiley
+  year: 2009
+  url: "https://ci.nii.ac.jp/books/search?q=Satellite%20communications%20systems%20Maral"
+  type: book
+  field: comm
+  level: advanced
+  lang: en
+  next: []
+  note: 英語の定番
+  candidate: true
+
+# ---------------- 姿勢制御 ----------------
+- id: rikigaku
+  title: 人工衛星の力学と制御ハンドブック ―基礎理論から応用技術まで―
+  author: 姿勢制御研究委員会 編
+  publisher: 培風館
+  year: 2007
+  url: "https://ci.nii.ac.jp/books/search?q=%E4%BA%BA%E5%B7%A5%E8%A1%9B%E6%98%9F%E3%81%AE%E5%8A%9B%E5%AD%A6%E3%81%A8%E5%88%B6%E5%BE%A1%E3%83%8F%E3%83%B3%E3%83%89%E3%83%96%E3%83%83%E3%82%AF"
+  type: book
+  field: adcs
+  level: basic
+  lang: ja
+  next: [sidi, kida-ctrl]
+  note: 日本語の辞書的な定番。必要な章を引いて使う
+  candidate: true
+
+- id: sidi
+  title: "Spacecraft Dynamics and Control: A Practical Engineering Approach"
+  author: Marcel J. Sidi
+  publisher: Cambridge University Press
+  year: 2000
+  url: "https://ci.nii.ac.jp/books/search?q=Spacecraft%20dynamics%20and%20control%20Sidi"
+  type: book
+  field: adcs
+  level: advanced
+  lang: en
+  next: [markley]
+  note: 実務寄りで読みやすい（英語）
+  candidate: true
+
+- id: kida-ctrl
+  title: スペースクラフトの制御
+  author: 木田隆
+  publisher: コロナ社
+  year: 1999
+  url: "https://www.coronasha.co.jp/np/isbn/9784339033137/"
+  type: book
+  field: adcs
+  level: advanced
+  lang: ja
+  next: [hughes]
+  note: 品切れ（電子版あり）
+  candidate: true
+
+- id: markley
+  title: Fundamentals of Spacecraft Attitude Determination and Control
+  author: F. Landis Markley・John L. Crassidis
+  publisher: Springer
+  year: 2014
+  url: "https://ci.nii.ac.jp/books/search?q=Fundamentals%20of%20spacecraft%20attitude%20determination%20and%20control"
+  type: book
+  field: adcs
+  level: advanced
+  lang: en
+  next: []
+  note: 姿勢決定の定番（英語）
+  candidate: true
+
+- id: hughes
+  title: 宇宙機の姿勢力学
+  author: ピーター・C. ヒューズ 著、原躬千夫 訳
+  publisher: （訳者による出版）
+  year: 2010
+  url: "https://ci.nii.ac.jp/ncid/BB01899317"
+  type: book
+  field: adcs
+  level: advanced
+  lang: ja
+  next: []
+  note: 網羅的で分厚い。本気で学ぶ人向け
+  candidate: true
+
+# ---------------- システム ----------------
+- id: harukanaru
+  title: 宇宙探査機はるかなる旅路へ ―宇宙ミッションをいかに実現するか―
+  author: 山川宏
+  publisher: 化学同人
+  year: 2013
+  url: "https://ci.nii.ac.jp/books/search?q=%E5%AE%87%E5%AE%99%E6%8E%A2%E6%9F%BB%E6%A9%9F%E3%81%AF%E3%82%8B%E3%81%8B%E3%81%AA%E3%82%8B%E6%97%85%E8%B7%AF%E3%81%B8"
+  type: book
+  field: system
+  level: intro
+  lang: ja
+  next: [ma-handbook]
+  note: ミッションをどう実現するかの読み物
+  candidate: true
+
+- id: ma-handbook
+  title: 超小型衛星ミッションアシュアランス・ハンドブック Ver4.0
+  author: UNISEC（大学宇宙工学コンソーシアム）
+  publisher: UNISEC
+  year: 2025
+  url: "https://ma.unisec.jp/wp-content/uploads/2025/03/ma_handbook_ver4.0.pdf"
+  type: handbook
+  field: system
+  level: intro
+  lang: ja
+  free: true
+  next: [nasa-se, soa]
+  note: 大学衛星の「やってはいけないこと」をまとめた本。英語版もある
+  candidate: true
+
+- id: nasa-se
+  title: NASA Systems Engineering Handbook
+  author: NASA
+  publisher: NASA
+  url: "https://www.nasa.gov/reference/systems-engineering-handbook/"
+  type: handbook
+  field: system
+  level: basic
+  lang: en
+  free: true
+  next: [mbse-intro, fortescue]
+  note: システムズエンジニアリングの基本（英語）
+  candidate: true
+
+- id: mbse-intro
+  title: モデルベースシステムズエンジニアリング入門
+  author: David Long・Zane Scott 著、阿部稔ほか 訳
+  publisher: ブイツーソリューション
+  year: 2019
+  url: "https://ci.nii.ac.jp/books/search?q=%E3%83%A2%E3%83%87%E3%83%AB%E3%83%99%E3%83%BC%E3%82%B9%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0%E3%82%BA%E3%82%A8%E3%83%B3%E3%82%B8%E3%83%8B%E3%82%A2%E3%83%AA%E3%83%B3%E3%82%B0%E5%85%A5%E9%96%80"
+  type: book
+  field: system
+  level: basic
+  lang: ja
+  next: [nishimura]
+  note: 薄めの入門書
+  candidate: true
+
+- id: nishimura
+  title: 実践に活かすモデルベースシステムズエンジニアリングの基礎
+  author: 西村秀和・河野文昭
+  publisher: 共立出版
+  year: 2025
+  url: "https://ci.nii.ac.jp/books/search?q=%E5%AE%9F%E8%B7%B5%E3%81%AB%E6%B4%BB%E3%81%8B%E3%81%99%E3%83%A2%E3%83%87%E3%83%AB%E3%83%99%E3%83%BC%E3%82%B9%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0%E3%82%BA%E3%82%A8%E3%83%B3%E3%82%B8%E3%83%8B%E3%82%A2%E3%83%AA%E3%83%B3%E3%82%B0%E3%81%AE%E5%9F%BA%E7%A4%8E"
+  type: book
+  field: system
+  level: advanced
+  lang: ja
+  next: []
+  note: SEワークショップとつながる
+  candidate: true
+
+- id: fortescue
+  title: Spacecraft Systems Engineering（4th ed.）
+  author: Peter Fortescue ほか 編
+  publisher: Wiley
+  year: 2011
+  url: "https://ci.nii.ac.jp/books/search?q=Spacecraft%20systems%20engineering"
+  type: book
+  field: system
+  level: advanced
+  lang: en
+  next: [smad]
+  note: 英語の定番教科書。SMADより読みやすい
+  candidate: true
+
+- id: smad
+  title: "Space Mission Engineering: The New SMAD"
+  author: James R. Wertz ほか 編
+  publisher: Microcosm Press
+  year: 2011
+  url: "https://ci.nii.ac.jp/books/search?q=Space%20mission%20engineering%20the%20new%20SMAD"
+  type: book
+  field: system
+  level: advanced
+  lang: en
+  next: []
+  note: 衛星設計の定番（英語）。通読せず必要な章を引く使い方
+  candidate: true
+
+- id: soa
+  title: State-of-the-Art of Small Spacecraft Technology
+  author: NASA Small Spacecraft Systems Virtual Institute
+  publisher: NASA
+  year: 2026
+  url: "https://www.nasa.gov/smallsat-institute/sst-soa/"
+  type: handbook
+  field: system
+  level: advanced
+  lang: en
+  free: true
+  next: []
+  note: 超小型衛星の機器が分野ごとにまとまっている。ミッション検討の参考に
+  candidate: true
+
+- id: cubesat-hb
+  title: "CubeSat Handbook: From Mission Design to Operations"
+  author: Chantal Cappelletti ほか 編
+  publisher: Academic Press
+  year: 2021
+  url: "https://ci.nii.ac.jp/books/search?q=CubeSat%20handbook"
+  type: book
+  field: system
+  level: advanced
+  lang: en
+  next: []
+  note: ミッション設計から運用まで、分野をまたいで使える（英語）
+  candidate: true
+
+# ---------------- 宇宙工学 ----------------
+- id: uchukogaku
+  title: 人工衛星・惑星探査機のための宇宙工学
+  author: 竹ヶ原春貴・佐原宏典・石井信明・古本政博
+  publisher: コロナ社
+  year: 2024
+  url: "https://www.coronasha.co.jp/np/isbn/9784339046892/"
+  type: book
+  field: space
+  level: basic
+  lang: ja
+  next: [kido]
+  note: 打上げから軌道投入までを、物理の意味から説明している
+  candidate: true
+
+- id: kido
+  title: 人工衛星の軌道概論
+  author: 川瀬成一郎
+  publisher: コロナ社
+  year: 2015
+  url: "https://ci.nii.ac.jp/books/search?q=%E4%BA%BA%E5%B7%A5%E8%A1%9B%E6%98%9F%E3%81%AE%E8%BB%8C%E9%81%93%E6%A6%82%E8%AB%96"
+  type: book
+  field: space
+  level: basic
+  lang: ja
+  next: [curtis]
+  note: 軌道の日本語テキスト
+  candidate: true
+
+- id: curtis
+  title: Orbital Mechanics for Engineering Students（4th ed.）
+  author: Howard D. Curtis
+  publisher: Butterworth-Heinemann
+  year: 2021
+  url: "https://ci.nii.ac.jp/books/search?q=Orbital%20mechanics%20for%20engineering%20students"
+  type: book
+  field: space
+  level: advanced
+  lang: en
+  next: []
+  note: 例題が多い軌道力学の定番（英語）
+  candidate: true
+
+- id: tribble
+  title: "The Space Environment: Implications for Spacecraft Design"
+  author: Alan C. Tribble
+  publisher: Princeton University Press
+  year: 2003
+  url: "https://ci.nii.ac.jp/books/search?q=The%20space%20environment%20implications%20for%20spacecraft%20design"
+  type: book
+  field: space
+  level: advanced
+  lang: en
+  next: []
+  note: 宇宙環境を衛星設計の目線で説明した定番（英語）。日本語の手頃な本は見つかっていない
+  candidate: true

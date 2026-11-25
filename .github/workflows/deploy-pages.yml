@@ -1,0 +1,56 @@
+# GitHub Pages への自動デプロイ
+# main ブランチに push（プルリクエストのマージを含む）すると、
+#   1. data/ の YAML に矛盾がないかを検査し（tools/validate_data.py）
+#   2. 問題がなければ、サイトのファイルを GitHub Pages に公開する
+# 検査で問題が見つかったときは公開されず、Actions の画面に原因が表示される。
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:          # プルリクエストでは検査だけを行う（公開はしない）
+  workflow_dispatch:     # Actions の画面から手動でも実行できる
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同時に2つのデプロイが走らないようにする
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: データの検査
+        run: |
+          pip install pyyaml
+          python tools/validate_data.py
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: validate
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: 公開するファイルをまとめる
+        run: |
+          mkdir _site
+          cp -r index.html style.css app.js data _site/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: GitHub Pages に公開
+        id: deployment
+        uses: actions/deploy-pages@v4

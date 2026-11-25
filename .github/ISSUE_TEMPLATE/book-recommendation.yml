@@ -1,0 +1,87 @@
+# 本の推薦フォーム（GitHub の Issue フォーム）
+# ページの「＋ 本を推薦する」を押すと、このフォームが「分野」「スキル」が入った状態で開く。
+# 項目の id（field / skill など）は app.js の recommend_url() と合わせる。id を変えるときは両方を直す。
+# 推薦が届いたら、管理者が実在を確かめて data/books.yaml に追加し、この Issue を閉じる（README の「本を追加する」を参照）。
+name: 本を推薦する
+description: ロードマップに載せたい本・資料を推薦する（GitHub のアカウントがあれば誰でも書けます）
+title: "[本の推薦] "
+labels: ["本の推薦"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        読んでよかった本・資料を教えてください。分かるところだけで大丈夫です（* は必須）。
+        **このページは公開されています。本名や連絡先は書かないでください。**
+
+  - type: input
+    id: field
+    attributes:
+      label: 分野
+      description: 共通基礎（common）／電源（eps）／熱（thermal）／構造（structure）／C&DH（cdh）／通信（comm）／姿勢制御（adcs）／システム（system）／宇宙工学（space）／製造試験（ait）
+      placeholder: 例：電源（eps）
+    validations:
+      required: true
+
+  - type: input
+    id: book_title
+    attributes:
+      label: 書名
+      placeholder: 例：人工衛星を作る
+    validations:
+      required: true
+
+  - type: input
+    id: author
+    attributes:
+      label: 著者・出版社・発行年
+      placeholder: 例：宮崎康行／オーム社／2011
+
+  - type: input
+    id: url
+    attributes:
+      label: 出版社や図書館（CiNii）のページの URL
+      description: 分からなければ空欄で大丈夫です。管理者が調べます
+      placeholder: https://
+
+  - type: dropdown
+    id: level
+    attributes:
+      label: レベル
+      options:
+        - 入門（最初に読む。全体像と面白さをつかむ）
+        - 基礎（分野の教科書。設計の考え方を学ぶ）
+        - 専門（必要な章を引いて使う専門書・英語の定番）
+        - 分からない
+    validations:
+      required: true
+
+  - type: input
+    id: skill
+    attributes:
+      label: 身につくスキル
+      description: ページのスキル名で書くと反映しやすいです（複数可）
+      placeholder: 例：電力収支の計算
+
+  - type: input
+    id: order
+    attributes:
+      label: 前後に読むとよい本
+      description: ロードマップに載っている本の名前で書いてください
+      placeholder: 例：「人工衛星を作る」のあとに読む
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: おすすめの理由・読み方のコツ
+      description: どの章が役に立ったか、どんな人に向いているか など
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: extra
+    attributes:
+      label: そのほか
+      options:
+        - label: 英語の本・資料
+        - label: 無料で読める（PDF など）
+        - label: 自分で読んだことがある

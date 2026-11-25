@@ -1,0 +1,2 @@
+# Issue を作るときの選択画面の設定。フォームを使わない白紙の Issue も作れるようにしておく
+blank_issues_enabled: true

@@ -1,0 +1,193 @@
+<title>人工衛星開発への道 レビュー版</title>
+<!-- claude.ai のアーティファクトとして公開する入口ページ。
+     中身（app.js・style.css・data/）は GitHub Pages 版と同じファイルを使い、
+     ここでは「修正点を書く」機能（claude.ai のコメント機能）だけを足している。
+     index.html の本文を直したときは、この review.html の本文も同じように直す（Claude に頼めば作り直せる） -->
+<link rel="stylesheet" href="style.css">
+<style>
+  /* ---------- 修正点の書き込み（レビュー版だけの追加） ---------- */
+  .review-fab {
+    position: fixed; z-index: 60;
+    right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    background: var(--navy); color: #FFFFFF; border: none; border-radius: var(--radius);
+    padding: 10px 16px; font-size: 0.9rem; font-weight: 700; cursor: pointer;
+    box-shadow: 0 2px 8px rgba(20, 32, 48, 0.25);
+  }
+  .review-fab[aria-pressed="true"] { background: #7A5A22; }
+  .review-bar {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 55;
+    background: #FFF6E0; border-bottom: 1px solid #E2C98A; color: #4A3A12;
+    padding: 8px max(16px, env(safe-area-inset-right, 0px)) 8px max(16px, env(safe-area-inset-left, 0px));
+    font-size: 0.85rem; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  }
+  .review-bar strong { color: #4A3A12; }
+  .review-bar .text-btn { color: #4A3A12; }
+  .review-note {
+    max-width: 1400px; margin: 0 auto; padding: 10px 24px 0; font-size: 0.8rem; color: var(--text-sub);
+  }
+  /* 修正点モードの間は、書き込める場所にマウスを乗せると点線の枠を出す */
+  body.review-mode [data-comment-target]:hover {
+    outline: 2px dashed #B8862B; outline-offset: 2px; cursor: crosshair;
+  }
+  body.review-mode [data-comment-target]:hover * { cursor: crosshair; }
+  @media (max-width: 760px) {
+    .review-fab { padding: 9px 14px; font-size: 0.85rem; }
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+<script src="app.js" defer></script>
+
+
+<div id="review-bar" class="review-bar" hidden>
+  <strong>修正点モード</strong>
+  <span>直したい場所（本・分野・見出し・工程など）をクリックすると、その場所にコメント欄が開きます。</span>
+  <button type="button" id="review-exit" class="text-btn">モードを終える</button>
+</div>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-text">
+        <h1>人工衛星開発への道</h1>
+        <p class="subtitle">Road to Satellite Development ― 本で進むロードマップ</p>
+        <p class="lead">
+          人工衛星の開発に必要な技術を、どの本を・どの順番で読めばよいかの地図にまとめました。
+          全部を専門家レベルで身につける必要はありません。全体像をつかんだら興味のある分野を選び、
+          入門 → 基礎 → 専門と読み進めて、設計・製造・試験のどこかに参加できる力をつけていきます。
+        </p>
+        <p class="mock-note">※ 試作版です。載せている本はすべて調べて挙げた候補で、チームではまだ決めていません。</p>
+      </div>
+      <dl class="overall-progress" aria-label="全体の進捗">
+        <div class="progress-row">
+          <dt>読んだ本</dt>
+          <dd><span id="overall-book-text">0 / 0</span><span class="bar"><span id="overall-book-bar" class="bar-fill book"></span></span></dd>
+        </div>
+        <div class="progress-row minor">
+          <dt>身についたスキル</dt>
+          <dd><span id="overall-skill-text">0 / 0</span><span class="bar"><span id="overall-skill-bar" class="bar-fill"></span></span></dd>
+        </div>
+        <p class="progress-note">チェックはこのブラウザにだけ保存されます（登録不要）。
+          <button type="button" id="reset-btn" class="text-btn">すべて外す</button></p>
+      </dl>
+    </div>
+  </header>
+
+  
+<p class="review-note">これはレビュー版です。右下の「修正点を書く」を押してから、気になる場所をクリックしてコメントを残してください。
+書いたコメントは、画面上部のコメント一覧からほかの人も見られます。</p>
+
+  <div id="error-box" class="error-box" role="alert" hidden></div>
+
+  <section class="section" aria-labelledby="fields-title">
+    <div class="section-head">
+      <h2 id="fields-title">分野</h2>
+      <p class="section-note">分野名を押すと、その分野と「共通（全体像）」の本だけに絞り込みます。もう一度押すと元に戻ります。</p>
+    </div>
+    <div id="field-cards" class="field-cards"></div>
+  </section>
+
+  <section class="section roadmap-section" aria-labelledby="roadmap-title">
+    <div class="roadmap-head">
+      <h2 id="roadmap-title">読む順</h2>
+      <button type="button" id="show-all-btn" class="text-btn" hidden>絞り込みを外す</button>
+    </div>
+    <p id="roadmap-legend" class="legend"></p>
+
+    <div class="layout">
+      <div class="roadmap-scroll">
+        <div id="board" class="board"></div>
+      </div>
+      <aside id="detail" class="detail-panel" aria-live="polite">
+        <div class="detail-empty">
+          <p class="detail-empty-title">本を選んでください</p>
+          <p>本の名前を押すと、ここに書誌情報と、その本で身につくスキルが出ます。右上の □ を押すと「読んだ」のチェックが付きます。</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="goal-title">
+    <div class="section-head">
+      <h2 id="goal-title">その先：衛星開発の流れ</h2>
+      <p class="section-note">読んで身につけた力は、実際の衛星開発の次の工程で使います。工程どうし・分野どうしは、システムズエンジニアリングがつなぎます。</p>
+    </div>
+    <div id="process" class="process"></div>
+  </section>
+
+  <footer class="site-footer">
+    <p>分野・スキル・本のデータは <code>data/</code> フォルダの YAML ファイルにあり、後から追加・修正できます。
+      本はすべて CiNii または出版社のページで実在を確認したものだけを載せています。</p>
+  </footer>
+
+<button type="button" id="review-fab" class="review-fab" aria-pressed="false" hidden>修正点を書く</button>
+<script>
+// =============================================================
+// 修正点の書き込み（claude.ai のコメント機能を使う）
+//   1. claude.use("comments") でコメント機能を受け取る（使えない環境では null）
+//   2. 「修正点を書く」でモードを切り替える
+//   3. モード中に書き込める場所をクリックすると、その場所にコメント欄を開く
+// コメントの一覧・返信の表示は claude.ai 側が行うので、このページでは作らない
+// =============================================================
+(function () {
+  // 書き込める場所（クリックしたとき、いちばん近いこの要素にコメントを付ける）
+  const COMMENT_TARGETS = [
+    ".card", ".field-card", ".lane-head", ".col-head", ".wanted-row",
+    ".process-step", ".process-se", ".detail-panel", ".legend",
+    ".section-head", ".roadmap-head", ".site-header h1", ".lead", ".overall-progress",
+  ].join(",");
+
+  const fab = document.getElementById("review-fab");
+  const bar = document.getElementById("review-bar");
+  let comments = null;
+  let review_mode = false;
+
+  // 書き込める場所に印（data-comment-target）を付ける。
+  // 表は絞り込みのたびに作り直されるので、変化を見張って付け直す
+  function mark_targets() {
+    document.querySelectorAll(COMMENT_TARGETS).forEach((el) => {
+      if (!el.hasAttribute("data-comment-target")) el.setAttribute("data-comment-target", "");
+    });
+  }
+  new MutationObserver(mark_targets).observe(document.body, { childList: true, subtree: true });
+  mark_targets();
+
+  function set_mode(on) {
+    review_mode = on;
+    document.body.classList.toggle("review-mode", on);
+    bar.hidden = !on;
+    fab.setAttribute("aria-pressed", String(on));
+    fab.textContent = on ? "修正点モードを終える" : "修正点を書く";
+  }
+
+  // モード中のクリックは、ページの普通の動き（本の選択など）より先に受け取り、コメント欄を開く
+  document.addEventListener("click", async (event) => {
+    if (!review_mode || !comments) return;
+    if (event.target.closest("#review-fab, #review-bar")) return;
+    const target = event.target.closest(COMMENT_TARGETS);
+    if (!target) return;
+    event.preventDefault();
+    event.stopPropagation();
+    try {
+      await comments.openComposer({ element: target });
+    } catch (error) {
+      if (error && error.code === "unavailable") {
+        set_mode(false);
+        fab.hidden = true;
+      }
+      console.warn("コメント欄を開けませんでした。", error);
+    }
+  }, true);
+
+  fab.addEventListener("click", () => set_mode(!review_mode));
+  document.getElementById("review-exit").addEventListener("click", () => set_mode(false));
+  document.addEventListener("keydown", (event) => { if (event.key === "Escape" && review_mode) set_mode(false); });
+
+  // コメント機能を受け取れたときだけボタンを出す
+  if (window.claude && typeof window.claude.use === "function") {
+    window.claude.use("comments").then((c) => {
+      if (!c) return;
+      comments = c;
+      fab.hidden = false;
+    }).catch(() => {});
+  }
+})();
+</script>

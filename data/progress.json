@@ -1,0 +1,36 @@
+{
+  "updated_at": "2026-11-24T21:00:00+09:00",
+  "note": "Phase 0 のダミーデータです。Phase 1 では GitHub Actions が進捗 Issue から自動で作ります（手で編集しない）。",
+  "members": [
+    {
+      "handle": "dummy-a",
+      "display_name": "メンバーA",
+      "done": ["common-what-is-satellite", "common-space-env", "common-circuit-basics", "common-programming-git", "system-ma-handbook", "system-se-basics", "power-basics", "power-budget", "ground-orbit-basics"],
+      "in_progress": ["power-circuit", "system-requirements"]
+    },
+    {
+      "handle": "dummy-b",
+      "display_name": "メンバーB",
+      "done": ["common-what-is-satellite", "common-programming-git", "common-circuit-basics", "cdh-mcu", "cdh-flight-software", "comm-radio-basics"],
+      "in_progress": ["cdh-cmd-tlm", "comm-license"]
+    },
+    {
+      "handle": "dummy-c",
+      "display_name": "メンバーC",
+      "done": ["common-what-is-satellite", "common-space-env", "structure-cad", "structure-strength", "thermal-basics"],
+      "in_progress": ["structure-vibration", "thermal-analysis"]
+    },
+    {
+      "handle": "dummy-d",
+      "display_name": "メンバーD",
+      "done": ["common-what-is-satellite", "common-space-env", "adcs-attitude-rep", "ground-orbit-basics"],
+      "in_progress": ["adcs-sensors", "system-ma-handbook"]
+    },
+    {
+      "handle": "dummy-e",
+      "display_name": "メンバーE",
+      "done": ["common-what-is-satellite"],
+      "in_progress": ["common-space-env", "common-programming-git"]
+    }
+  ]
+}

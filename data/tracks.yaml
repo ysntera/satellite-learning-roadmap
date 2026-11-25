@@ -1,0 +1,70 @@
+# 分野（技術分野）の一覧
+# - id          : 英小文字。nodes.yaml / books.yaml の field から参照する。後から変えない
+# - name        : 表示名
+# - name_en     : 英語名（略称）
+# - color       : 分野の色（白い背景の上で文字としても読める濃さにする）
+# - description : 分野の説明（初学者向けに1〜2文）
+# - common      : true なら「共通基礎」（専門分野の前に学ぶもの）
+# - cross       : true なら他の分野を横断的につなぐ分野（システム）
+
+- id: common
+  name: 共通基礎
+  name_en: Fundamentals
+  color: "#64748B"
+  common: true
+  description: どの分野に進むにしても、先に身につけておきたい土台。大学の授業と重なる部分が多い。
+
+- id: eps
+  name: 電源
+  name_en: EPS
+  color: "#CA8A04"
+  description: 太陽電池で電気を作り、バッテリーにためて、各機器に配る。衛星の「心臓」。
+
+- id: thermal
+  name: 熱
+  name_en: Thermal Control
+  color: "#DC2626"
+  description: 真空の宇宙で、機器の温度を動作できる範囲に保つ。
+
+- id: structure
+  name: 構造
+  name_en: Structure
+  color: "#2563EB"
+  description: 打上げの揺れに耐え、機器を支える衛星の骨組みを設計・製作する。
+
+- id: cdh
+  name: C&DH
+  name_en: Command & Data Handling
+  color: "#0D9488"
+  description: 搭載計算機（OBC）とソフトウェアで、命令を実行し、データを集めて管理する。衛星の「頭脳」。
+
+- id: comm
+  name: 通信
+  name_en: Communications
+  color: "#65A30D"
+  description: 電波で地上局とつながり、命令を受け取り、データを送る。地上局での運用も含む。
+
+- id: adcs
+  name: 姿勢制御
+  name_en: ADCS
+  color: "#9333EA"
+  description: 衛星の向き（姿勢）を測り、目標の向きに変える。カメラやアンテナを正しい方向に向けるのに必要。
+
+- id: system
+  name: システム
+  name_en: Systems Engineering
+  color: "#DB2777"
+  cross: true
+  description: ミッションと要求を決め、8つの分野をつないで1機の衛星にまとめる。全分野を横断する役割。
+
+- id: space
+  name: 宇宙工学
+  name_en: Space Engineering
+  color: "#4F46E5"
+  description: 軌道・宇宙環境・打上げなど、衛星が置かれる「宇宙」そのものを理解する。
+
+- id: ait
+  name: 製造試験
+  name_en: AIT
+  color: "#EA580C"
+  description: 部品を作り、組み立て（Assembly）、統合し（Integration）、試験（Test）で正しく動くことを確かめる。
