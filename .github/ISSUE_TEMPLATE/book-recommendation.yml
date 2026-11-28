@@ -43,15 +43,14 @@ body:
       description: 分からなければ空欄で大丈夫です。管理者が調べます
       placeholder: https://
 
-  - type: dropdown
+  # レベルと「そのほか」は、選択式（dropdown・checkboxes）ではなく文字の欄にしている。
+  # GitHub は選択式の欄に URL から値を入れられないため。ページ内の推薦フォームで選んだ内容が、ここに文字で入る
+  - type: input
     id: level
     attributes:
       label: レベル
-      options:
-        - 入門（最初に読む。全体像と面白さをつかむ）
-        - 基礎（分野の教科書。設計の考え方を学ぶ）
-        - 専門（必要な章を引いて使う専門書・英語の定番）
-        - 分からない
+      description: 入門（最初に読む。全体像と面白さをつかむ）／基礎（分野の教科書。設計の考え方を学ぶ）／専門（必要な章を引いて使う専門書・英語の定番）／分からない
+      placeholder: 例：基礎
     validations:
       required: true
 
@@ -77,11 +76,9 @@ body:
     validations:
       required: true
 
-  - type: checkboxes
+  - type: input
     id: extra
     attributes:
       label: そのほか
-      options:
-        - label: 英語の本・資料
-        - label: 無料で読める（PDF など）
-        - label: 自分で読んだことがある
+      description: 当てはまるものがあれば書いてください：英語の本・資料／無料で読める（PDF など）／自分で読んだことがある
+      placeholder: 例：自分で読んだことがある

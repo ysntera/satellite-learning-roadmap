@@ -345,13 +345,217 @@ function recommend_url(field_id, skill) {
   return `${GITHUB_REPO_URL.replace(/\/$/, "")}/issues/new?${params.toString()}`;
 }
 
+// リンクの href は GitHub のフォームのまま残す（新しいタブで開く操作や、JavaScript が動かないときの予備）。
+// ふつうにクリックしたときは setup_recommend_dialog() の処理で、ページ内の大きなフォームを開く
 function recommend_link_html(field_id, skill = null, label = "＋ 本を推薦する") {
   const url = recommend_url(field_id, skill);
   if (!url) {
     return `<span class="recommend-link disabled" title="GitHub に公開したあとで使えるようになります">${escape_html(label)}（公開後に使えます）</span>`;
   }
-  return `<a class="recommend-link" href="${escape_html(url)}" target="_blank" rel="noopener">${escape_html(label)}</a>`;
+  return `<a class="recommend-link" href="${escape_html(url)}" target="_blank" rel="noopener"
+    data-rec-field="${escape_html(field_id)}" data-rec-skill="${escape_html(skill ? skill.id : "")}">${escape_html(label)}</a>`;
 }
+
+// =============================================================
+// 本の推薦フォーム（ページ内の大きな画面）
+//   1枚目で入力 → 2枚目で確認し、「GitHub を開く」で、入力した内容を URL の「?項目id=値」に入れた
+//   GitHub の Issue フォームを開く。
+//   GitHub 側で「Create」を押すまでは何も送られない（このページはどこにもデータを保存しない）
+// =============================================================
+
+// レベルの選択肢。value がそのまま GitHub の Issue フォームの「レベル」の欄に文字で入る
+const REC_LEVELS = [
+  { value: "入門（最初に読む。全体像と面白さをつかむ）", name: "入門", desc: "最初に読む。全体像と面白さをつかむ" },
+  { value: "基礎（分野の教科書。設計の考え方を学ぶ）", name: "基礎", desc: "分野の教科書。設計の考え方を学ぶ" },
+  { value: "専門（必要な章を引いて使う専門書・英語の定番）", name: "専門", desc: "必要な章を引いて使う専門書・英語の定番" },
+  { value: "分からない", name: "分からない", desc: "迷ったらこれ。管理者が決めます" },
+];
+// 「そのほか」のチェック。チェックしたものを「、」でつないで、Issue フォームの「そのほか」の欄に入れる
+const REC_EXTRAS = ["英語の本・資料", "無料で読める（PDF など）", "自分で読んだことがある"];
+// GitHub が受け付ける URL の長さには上限がある（約 8000 文字）。日本語は 1 文字が約 9 文字に増えるので余裕をみる
+const REC_MAX_URL_LENGTH = 7500;
+
+const rec = { dialog: null, form: null };
+
+function setup_recommend_dialog() {
+  rec.dialog = document.getElementById("recommend-dialog");
+  rec.form = document.getElementById("recommend-form");
+  if (!rec.dialog || !GITHUB_REPO_URL) return;
+
+  // 分野の選択肢
+  const field_select = document.getElementById("rec-field");
+  field_select.innerHTML = state.tracks
+    .map((t) => `<option value="${escape_html(t.id)}">${escape_html(t.name)}（${escape_html(t.id)}）</option>`).join("");
+  field_select.addEventListener("change", () => render_rec_skills([]));
+
+  // レベル（大きめのボタン型のラジオボタン）
+  document.getElementById("rec-level").innerHTML = REC_LEVELS.map((lv) => `
+    <label class="rec-level"><input type="radio" name="level" value="${escape_html(lv.value)}">
+      <span class="rec-level-name">${escape_html(lv.name)}</span><span class="rec-level-desc">${escape_html(lv.desc)}</span></label>`).join("");
+
+  // そのほか
+  document.getElementById("rec-extra").innerHTML = REC_EXTRAS.map((label) => `
+    <label class="rec-check"><input type="checkbox" name="extra" value="${escape_html(label)}"> ${escape_html(label)}</label>`).join("");
+
+  // 「前後に読むとよい本」の入力候補（載っている本の書名）
+  document.getElementById("rec-book-list").innerHTML = state.books
+    .map((b) => `<option value="「${escape_html(b.title)}」のあとに読む"></option>`).join("");
+
+  // 推薦リンクのクリック（表は何度も描き直すので、ページ全体で1回だけ受け取る）
+  document.addEventListener("click", (event) => {
+    const link = event.target.closest("a.recommend-link[data-rec-field]");
+    if (!link) return;
+    // Ctrl / ⌘ / 中ボタンでのクリックは、ブラウザどおり GitHub のフォームを新しいタブで開く
+    if (event.ctrlKey || event.metaKey || event.shiftKey || event.button !== 0) return;
+    event.preventDefault();
+    open_recommend_dialog(link.dataset.recField, link.dataset.recSkill || null);
+  });
+
+  rec.dialog.querySelectorAll("[data-rec-close]").forEach((btn) =>
+    btn.addEventListener("click", () => rec.dialog.close()));
+  // 枠の外（暗いところ）を押しても閉じる
+  rec.dialog.addEventListener("click", (event) => { if (event.target === rec.dialog) rec.dialog.close(); });
+  rec.form.addEventListener("submit", (event) => { event.preventDefault(); submit_recommend(); });
+  rec.form.addEventListener("input", () => hide_rec_error());
+  document.getElementById("rec-back").addEventListener("click", () => show_rec_page("form"));
+  document.getElementById("rec-new").addEventListener("click", reset_recommend_form);
+}
+
+// 選んだ分野のスキルを、チェックボックスで並べる
+function render_rec_skills(checked_ids) {
+  const field_id = document.getElementById("rec-field").value;
+  const skills = state.skills.filter((s) => s.field === field_id);
+  document.getElementById("rec-skills").innerHTML = skills.length
+    ? skills.map((s) => `
+      <label class="rec-check"><input type="checkbox" name="skill" value="${escape_html(s.id)}"
+        ${checked_ids.includes(s.id) ? "checked" : ""}> ${escape_html(s.title)}
+        ${s.books.length ? "" : '<span class="rec-wanted">募集中</span>'}</label>`).join("")
+    : '<p class="muted">この分野にはまだスキルがありません。下の欄に書いてください。</p>';
+}
+
+function open_recommend_dialog(field_id, skill_id) {
+  const field_select = document.getElementById("rec-field");
+  const field_changed = field_select.value !== field_id;
+  if (index.track.has(field_id)) field_select.value = field_id;
+  // 同じ分野をもう一度開いたときは、書きかけの内容を残す。スキルから開いたときはそのスキルにチェックを付ける
+  const checked = field_changed ? [] : selected_rec_skill_ids();
+  if (skill_id && !checked.includes(skill_id)) checked.push(skill_id);
+  render_rec_skills(checked);
+  update_rec_direct_link(field_id, skill_id);
+  hide_rec_error();
+  rec.dialog.showModal();
+  show_rec_page("form");
+}
+
+function selected_rec_skill_ids() {
+  return [...rec.form.querySelectorAll('input[name="skill"]:checked')].map((el) => el.value);
+}
+
+function update_rec_direct_link(field_id, skill_id) {
+  const url = recommend_url(field_id, skill_id ? index.skill.get(skill_id) : null);
+  document.getElementById("rec-direct-link").href = url || "#";
+}
+
+// 入力内容を、GitHub の Issue フォームの URL にする
+function build_recommend_issue_url() {
+  const value = (id) => document.getElementById(id).value.trim();
+  const track = index.track.get(value("rec-field"));
+  const skills = selected_rec_skill_ids().map((id) => index.skill.get(id)).filter(Boolean);
+  const skill_texts = skills.map((s) => `${s.title}（${s.id}）`);
+  if (value("rec-skill-other")) skill_texts.push(value("rec-skill-other"));
+  const level = rec.form.querySelector('input[name="level"]:checked')?.value || "";
+  const extras = [...rec.form.querySelectorAll('input[name="extra"]:checked')].map((el) => el.value);
+
+  const params = new URLSearchParams({
+    template: RECOMMEND_TEMPLATE,
+    title: `[本の推薦] ${track ? track.name : ""}：${value("rec-book-title")}`,
+    field: track ? `${track.name}（${track.id}）` : "",
+    book_title: value("rec-book-title"),
+    author: value("rec-author"),
+    url: value("rec-url"),
+    level: level,
+    skill: skill_texts.join("、"),
+    order: value("rec-order"),
+    reason: value("rec-reason"),
+  });
+  if (extras.length) params.set("extra", extras.join("、"));
+  // 空の項目は URL に入れない（短くするため）
+  [...params.keys()].forEach((key) => { if (!params.get(key)) params.delete(key); });
+  return `${GITHUB_REPO_URL.replace(/\/$/, "")}/issues/new?${params.toString()}`;
+}
+
+// 必須の項目が埋まっているか確かめる。足りなければ、何が足りないかの文を返す
+function check_recommend_form() {
+  const missing = [];
+  if (!document.getElementById("rec-book-title").value.trim()) missing.push("書名");
+  if (!rec.form.querySelector('input[name="level"]:checked')) missing.push("レベル");
+  if (!document.getElementById("rec-reason").value.trim()) missing.push("おすすめの理由");
+  const url = document.getElementById("rec-url").value.trim();
+  if (url && !is_http_url(url)) return "URL は https:// から始まる形で書いてください（分からなければ空欄で大丈夫です）。";
+  return missing.length ? `${missing.join("・")}を入力してください。` : "";
+}
+
+function submit_recommend() {
+  const problem = check_recommend_form();
+  if (problem) { show_rec_error(problem); return; }
+  const url = build_recommend_issue_url();
+  if (url.length > REC_MAX_URL_LENGTH) {
+    show_rec_error("文章が長すぎて GitHub に渡せません。おすすめの理由を短くするか、GitHub のページで書き足してください。");
+    return;
+  }
+  // 2枚目（確認と GitHub へ進む画面）に切り替える。
+  // GitHub へは、ボタン（ふつうのリンク）を押して移るので、ブラウザのポップアップ防止に止められない
+  document.getElementById("rec-go-github").href = url;
+  document.getElementById("rec-summary").innerHTML = recommend_summary_html();
+  show_rec_page("confirm");
+}
+
+// 確認画面に出す一覧（入力のない項目は出さない）
+function recommend_summary_html() {
+  const value = (id) => document.getElementById(id).value.trim();
+  const track = index.track.get(value("rec-field"));
+  const skills = selected_rec_skill_ids().map((id) => index.skill.get(id)?.title).filter(Boolean);
+  if (value("rec-skill-other")) skills.push(value("rec-skill-other"));
+  const level = rec.form.querySelector('input[name="level"]:checked')?.value || "";
+  const extras = [...rec.form.querySelectorAll('input[name="extra"]:checked')].map((el) => el.value);
+  const rows = [
+    ["分野", track ? track.name : ""],
+    ["書名", value("rec-book-title")],
+    ["著者・出版社・発行年", value("rec-author")],
+    ["URL", value("rec-url")],
+    ["レベル", level],
+    ["身につくスキル", skills.join("、")],
+    ["前後に読むとよい本", value("rec-order")],
+    ["おすすめの理由", value("rec-reason")],
+    ["そのほか", extras.join("、")],
+  ];
+  return rows.filter(([, v]) => v)
+    .map(([k, v]) => `<div><dt>${escape_html(k)}</dt><dd>${escape_html(v)}</dd></div>`).join("");
+}
+
+// "form"（1枚目：入力）と "confirm"（2枚目：確認）を切り替える
+function show_rec_page(page) {
+  rec.form.hidden = page !== "form";
+  document.getElementById("rec-confirm").hidden = page !== "confirm";
+  const focus_id = page === "confirm" ? "rec-go-github" : "rec-book-title";
+  document.getElementById(focus_id).focus();
+}
+
+// 送り終えたら、次の推薦のために中身を空にして入力画面に戻す
+function reset_recommend_form() {
+  const field_id = document.getElementById("rec-field").value;
+  rec.form.reset();
+  document.getElementById("rec-field").value = field_id;   // 分野は続けて同じものを使うことが多いので残す
+  render_rec_skills([]);
+  show_rec_page("form");
+}
+
+function show_rec_error(message) {
+  const el = document.getElementById("rec-error");
+  el.textContent = message;
+  el.hidden = false;
+}
+function hide_rec_error() { document.getElementById("rec-error").hidden = true; }
 
 function field_chip_button(field_id) {
   const t = index.track.get(field_id);
@@ -732,6 +936,7 @@ async function main() {
     render_field_cards();
     render_process();
     setup_controls();
+    setup_recommend_dialog();
     render_board();
   } catch (error) {
     show_error(error.message);

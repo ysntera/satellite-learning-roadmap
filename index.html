@@ -8,10 +8,10 @@
   <!-- パスはすべて相対パス（./）にする。GitHub Pages の https://ユーザー名.github.io/リポジトリ名/ のような
        サブパスで公開しても、ファイルの場所がずれないようにするため -->
   <!-- ?v=… は版の印。ファイルを直したら数字を変えると、ブラウザが古いファイルを使い回さなくなる -->
-  <link rel="stylesheet" href="./style.css?v=9">
+  <link rel="stylesheet" href="./style.css?v=10">
   <!-- 外部ライブラリは js-yaml（YAML ファイルを JavaScript のデータに変える）だけ。ビルドの手順はいらない -->
   <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js" defer></script>
-  <script src="./app.js?v=9" defer></script>
+  <script src="./app.js?v=10" defer></script>
 </head>
 <body>
   <header class="site-header">
@@ -78,6 +78,114 @@
     </div>
     <div id="process" class="process"></div>
   </section>
+
+  <!-- 本の推薦フォーム（「＋ 本を推薦する」を押すと開く大きな画面）
+       送るボタンを押すと、入力した内容が入った状態で GitHub の Issue フォームが開く。
+       項目は .github/ISSUE_TEMPLATE/book-recommendation.yml と同じにしてある -->
+  <dialog id="recommend-dialog" class="recommend-dialog" aria-labelledby="recommend-title">
+    <form id="recommend-form" class="recommend-form" method="dialog" novalidate>
+      <div class="rec-head">
+        <h2 id="recommend-title">本を推薦する</h2>
+        <button type="button" class="rec-close" data-rec-close aria-label="閉じる">閉じる ✕</button>
+      </div>
+
+      <div class="rec-body">
+        <p class="rec-lead">読んでよかった本・資料を教えてください。分かるところだけで大丈夫です（<span class="req">*</span> は必須）。
+          <strong>推薦は GitHub に公開されます。本名や連絡先は書かないでください。</strong></p>
+
+        <div class="rec-grid">
+          <label class="rec-field">
+            <span class="rec-label">分野 <span class="req">*</span></span>
+            <select id="rec-field" name="field" required></select>
+          </label>
+
+          <label class="rec-field">
+            <span class="rec-label">書名 <span class="req">*</span></span>
+            <input id="rec-book-title" name="book_title" type="text" required placeholder="例：人工衛星をつくる">
+          </label>
+
+          <label class="rec-field">
+            <span class="rec-label">著者・出版社・発行年</span>
+            <input id="rec-author" name="author" type="text" placeholder="例：宮崎康行／オーム社／2011">
+          </label>
+
+          <label class="rec-field">
+            <span class="rec-label">出版社や図書館（CiNii）のページの URL</span>
+            <input id="rec-url" name="url" type="url" placeholder="https://（分からなければ空欄で大丈夫です）">
+          </label>
+
+          <fieldset class="rec-field rec-wide">
+            <legend class="rec-label">レベル <span class="req">*</span></legend>
+            <div id="rec-level" class="rec-levels"></div>
+          </fieldset>
+
+          <fieldset class="rec-field rec-wide">
+            <legend class="rec-label">身につくスキル <span class="rec-hint">（選んだ分野のスキル。複数選べます）</span></legend>
+            <div id="rec-skills" class="rec-skills"></div>
+            <input id="rec-skill-other" name="skill_other" type="text" placeholder="一覧にないスキルがあれば書いてください">
+          </fieldset>
+
+          <label class="rec-field rec-wide">
+            <span class="rec-label">前後に読むとよい本</span>
+            <input id="rec-order" name="order" type="text" list="rec-book-list" placeholder="例：「人工衛星をつくる」のあとに読む">
+            <datalist id="rec-book-list"></datalist>
+          </label>
+
+          <label class="rec-field rec-wide">
+            <span class="rec-label">おすすめの理由・読み方のコツ <span class="req">*</span></span>
+            <textarea id="rec-reason" name="reason" rows="7" required
+              placeholder="どの章が役に立ったか、どんな人に向いているか など"></textarea>
+          </label>
+
+          <fieldset class="rec-field rec-wide">
+            <legend class="rec-label">そのほか</legend>
+            <div id="rec-extra" class="rec-extra"></div>
+          </fieldset>
+        </div>
+      </div>
+
+      <div class="rec-foot">
+        <p id="rec-error" class="rec-error" role="alert" hidden></p>
+        <p class="rec-note">「確認へ進む」を押すと、入力した内容の確認画面になります。そこから GitHub に移って送ります。</p>
+        <div class="rec-actions">
+          <a id="rec-direct-link" class="rec-direct" href="#" target="_blank" rel="noopener">GitHub のフォームを直接開く</a>
+          <button type="button" class="rec-cancel" data-rec-close>やめる</button>
+          <button type="submit" class="rec-submit">確認へ進む →</button>
+        </div>
+      </div>
+    </form>
+
+    <!-- 2枚目：確認と GitHub へ進む画面 -->
+    <div id="rec-confirm" class="recommend-form" hidden>
+      <div class="rec-head">
+        <h2>内容の確認と送り方</h2>
+        <button type="button" class="rec-close" data-rec-close aria-label="閉じる">閉じる ✕</button>
+      </div>
+      <div class="rec-body">
+        <ol class="rec-steps">
+          <li class="rec-step"><span class="rec-step-num">1</span>
+            <div><p class="rec-step-title">下の内容で合っているか確かめる</p>
+              <dl id="rec-summary" class="rec-summary"></dl></div></li>
+          <li class="rec-step"><span class="rec-step-num">2</span>
+            <div><p class="rec-step-title">「GitHub を開く」を押す</p>
+              <p class="rec-step-desc">新しいタブで GitHub の推薦フォームが開きます。いま入力した内容は、最初から入っています。
+                GitHub にログインしていないときは、先にログイン（アカウントがなければ作成）してください。</p>
+              <a id="rec-go-github" class="rec-go" href="#" target="_blank" rel="noopener">GitHub を開く ↗</a></div></li>
+          <li class="rec-step"><span class="rec-step-num">3</span>
+            <div><p class="rec-step-title">GitHub のページのいちばん下にある「Create」を押す</p>
+              <p class="rec-step-desc">これで推薦が届きます。届いた推薦は管理者が確かめて、ロードマップに追加します。
+                Create を押すまでは、どこにも送られません。</p></div></li>
+        </ol>
+      </div>
+      <div class="rec-foot">
+        <div class="rec-actions">
+          <button type="button" class="rec-cancel rec-back" id="rec-back">← 入力に戻る</button>
+          <button type="button" class="rec-cancel" id="rec-new">送り終えた（次の本を推薦する）</button>
+          <button type="button" class="rec-submit" data-rec-close>閉じる</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
 
   <footer class="site-footer">
     <p>分野・スキル・本のデータは <code>data/</code> フォルダの YAML ファイルにあり、後から追加・修正できます。
